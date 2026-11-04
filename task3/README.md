@@ -45,7 +45,7 @@ uv sync --locked
 uv run jupyter execute task3_monthly_spending.ipynb --inplace
 ```
 
-For the intended full experiment, open the Colab link, select **A100 + High-RAM**, then Run all. The tested runtime version is **2025.10**. The bootstrap installs matching direct dependency pins, resolves authorized Task 3 inputs from an immutable supplied-data mirror and verifies their hashes. Restart the kernel first if numerical packages were imported before changing versions.
+For the intended full experiment, open the Colab link, select **A100 + High-RAM** (or **T4 + High-RAM**), then Run all. The tested Colab runtime version is **2025.10**. Colab installs the exact direct dependency pins before model imports. If Colab GPU allocation is blocked, the notebook also supports a Kaggle GPU runtime: it uses Kaggle's preinstalled packages, records their actual versions and pin differences in the run manifest, and stops if a required package is missing. It does not try to replace an already-imported numerical stack. The 45 GiB RAM guard applies to Colab; Kaggle's actual RAM is recorded with its run evidence. Both hosted routes resolve authorized Task 3 inputs from the immutable supplied-data mirror and verify their hashes.
 
 LightGBM explicitly uses deterministic CPU training. CatBoost/XGBoost request CUDA; implicit CPU fallback is rejected. Fixed seeds do not guarantee bitwise identity across GPU hardware or library builds.
 
