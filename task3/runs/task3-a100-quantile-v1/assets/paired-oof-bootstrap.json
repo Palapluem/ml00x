@@ -1,0 +1,11 @@
+{
+  "candidate_minus_baseline_mae_thb": 0.0,
+  "ci95_lower_thb": 0.0,
+  "ci95_upper_thb": 0.0,
+  "repeats": 1000,
+  "seed": 42,
+  "resampling_unit": "labeled row, paired on identical saved OOF predictions",
+  "interpretation": "Conditional descriptive interval. CV training sets overlap; candidate selection and hyperparameter tuning are not repeated in this bootstrap. This is not independent confirmation, a corrected CV significance test, or a p-value.",
+  "baseline": "legacy-hurdle-fixed",
+  "candidate": "legacy-hurdle-fixed"
+}

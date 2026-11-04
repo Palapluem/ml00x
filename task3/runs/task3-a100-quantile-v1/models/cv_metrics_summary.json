@@ -1,0 +1,1750 @@
+{
+  "run_id": "task3-a100-quantile-v1",
+  "created_utc": "2026-11-04T08:28:38.481545+00:00",
+  "selected_variant": "legacy-hurdle-fixed",
+  "selection_label": "development_selection_on_same_oof",
+  "independently_confirmed": false,
+  "score_definition": "NMAE = 1/(1 + sum(abs(y-pred))/sum(y)); larger is better; raw THB",
+  "pooled_oof_is_primary": true,
+  "candidate_metrics": [
+    {
+      "model_variant": "legacy-hurdle-fixed",
+      "oof_mae_thb": 2832.4113364732134,
+      "oof_nmae": 0.7875072918887649,
+      "fold_mae_mean_thb": 2832.411336473214,
+      "fold_mae_std_thb": 32.353688618652576,
+      "fold_nmae_mean": 0.7874441765884016,
+      "fold_nmae_std": 0.005057413237441995,
+      "oof_rows": 104000,
+      "fold_count": 5,
+      "test_zero_fraction": 0.48912665610877204,
+      "folds": [
+        {
+          "outer_fold": 0,
+          "rows": 20800,
+          "mae_thb": 2864.7982517153714,
+          "nmae": 0.778548711631768
+        },
+        {
+          "outer_fold": 1,
+          "rows": 20800,
+          "mae_thb": 2868.568393473968,
+          "nmae": 0.7882229152486724
+        },
+        {
+          "outer_fold": 2,
+          "rows": 20800,
+          "mae_thb": 2797.9537335190635,
+          "nmae": 0.7902139510421531
+        },
+        {
+          "outer_fold": 3,
+          "rows": 20800,
+          "mae_thb": 2809.776509311574,
+          "nmae": 0.7895665688531447
+        },
+        {
+          "outer_fold": 4,
+          "rows": 20800,
+          "mae_thb": 2820.959794346092,
+          "nmae": 0.7906687361662698
+        }
+      ],
+      "reported_fold_metrics": [
+        {
+          "fold": 0,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2864.7982517153714,
+          "nmae": 0.778548711631768,
+          "target_sum": 209490800.85,
+          "absolute_error_sum": 59587803.63567972,
+          "seconds": 30.004995916000098
+        },
+        {
+          "fold": 1,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2868.568393473968,
+          "nmae": 0.7882229152486724,
+          "target_sum": 222074470.25,
+          "absolute_error_sum": 59666222.584258534,
+          "seconds": 16.190692278999904
+        },
+        {
+          "fold": 2,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2797.9537335190635,
+          "nmae": 0.7902139510421531,
+          "target_sum": 219215850.53000003,
+          "absolute_error_sum": 58197437.65719652,
+          "seconds": 18.288287158000003
+        },
+        {
+          "fold": 3,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2809.776509311574,
+          "nmae": 0.7895665688531447,
+          "target_sum": 219285102.09,
+          "absolute_error_sum": 58443351.393680744,
+          "seconds": 16.148733753000215
+        },
+        {
+          "fold": 4,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2820.959794346092,
+          "nmae": 0.7906687361662698,
+          "target_sum": 221625997.14000002,
+          "absolute_error_sum": 58675963.72239872,
+          "seconds": 18.41546726500019
+        }
+      ],
+      "configuration": {
+        "spec": {
+          "name": "legacy-hurdle-fixed",
+          "family": "legacy_hurdle",
+          "feature_set": "baseline53"
+        },
+        "cfg": {
+          "seed": 42,
+          "n_splits": 5,
+          "inner_folds": 3,
+          "raw_iterations": 1200,
+          "n_jobs": 12,
+          "gpu": true,
+          "device": "cuda",
+          "gpu_devices": "0",
+          "allow_cpu_fallback": false,
+          "bootstrap_repeats": 1000,
+          "task_dir": "/content/ml004-task3",
+          "data_dir": "/content/ml004-task3/data",
+          "sample_submission_path": "/content/ml004-task3/data/sample_submission.csv",
+          "notebook_path": "/content/ml004-task3/task3_monthly_spending.ipynb",
+          "reference_submission_path": "/content/ml004-task3/reference/previous-submission.csv",
+          "stratify_positive_quantiles": false,
+          "strict_duplicate_groups": true,
+          "source_commit": null,
+          "base_source_commit": "f55210616e71b47c68c4e5c8999ca21d909e88ac",
+          "code_revision_note": "New notebook source is identified by source-bundle SHA256; base commit is not the edited source.",
+          "promote": false,
+          "notebook_source_bundle_sha256": "88f9db688f0bd4e14f12690a001b2d04e9db811b91657340de08e13f174789b2"
+        },
+        "packages": {
+          "numpy": "2.2.6",
+          "pandas": "2.2.3",
+          "scikit-learn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "catboost": "1.2.8",
+          "xgboost": "3.0.2",
+          "joblib": "1.5.1"
+        },
+        "source_metadata": [
+          {
+            "role": "train",
+            "path": "/content/ml004-task3/data/train.csv",
+            "sha256": "fa62c4250acb525d61feae7f53ef7256f58ee38860cc7a172ccc63016a4e314e",
+            "rows": 104000,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment",
+              "spending_30d"
+            ]
+          },
+          {
+            "role": "test_prediction_only",
+            "path": "/content/ml004-task3/data/test.csv",
+            "sha256": "12c8ae5c09353b9c644d858f2cc6115a606336a6b3e0fac7a55e5f903300caef",
+            "rows": 25889,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment"
+            ]
+          },
+          {
+            "role": "canonical_submission_order",
+            "path": "/content/ml004-task3/data/sample_submission.csv",
+            "sha256": "48a77166cd561d5f1633dbd98843484f98275e67665a2c5ddf3d0e04f8adc3a9",
+            "rows": 25889,
+            "columns": [
+              "id",
+              "task1",
+              "task2",
+              "task3",
+              "task4",
+              "task5"
+            ]
+          }
+        ],
+        "train_sha256": "39420194d118d0b4b3d3c9dc4d9f629bc8737b8d787d14e8e652d480082e39fb",
+        "test_sha256": "6cb46652111f67239113ee1aba82c11d36eeae145b3a53fd837645fcdc5a9d6d",
+        "target_sha256": "84fe1c5ef5bdf220582d636eba37a69234ba2233e0821cf95826cdb18fc90cbb",
+        "fold_sha256": "6822bafecb802549f620429093bce68faf7f3d2d7cbca4d8fa9962988bccbab9",
+        "engine_sha256": "011fb100fb42c09fa9406f837e834b5f170b400f564378d7a8bfb83dcc2822f2",
+        "platform": "Linux-6.6.159+-x86_64-with-glibc2.35"
+      }
+    },
+    {
+      "model_variant": "raw-lgb-raw32",
+      "oof_mae_thb": 2910.609812238852,
+      "oof_nmae": 0.7829142522394148,
+      "fold_mae_mean_thb": 2910.6098122388516,
+      "fold_mae_std_thb": 42.766991426406385,
+      "fold_nmae_mean": 0.7828491451855865,
+      "fold_nmae_std": 0.005667993463727963,
+      "oof_rows": 104000,
+      "fold_count": 5,
+      "test_zero_fraction": 0.0029356097184132257,
+      "folds": [
+        {
+          "outer_fold": 0,
+          "rows": 20800,
+          "mae_thb": 2959.902515879039,
+          "nmae": 0.7728668735780473
+        },
+        {
+          "outer_fold": 1,
+          "rows": 20800,
+          "mae_thb": 2945.2330907168202,
+          "nmae": 0.7837867562602173
+        },
+        {
+          "outer_fold": 2,
+          "rows": 20800,
+          "mae_thb": 2860.2104375561794,
+          "nmae": 0.7865424440217876
+        },
+        {
+          "outer_fold": 3,
+          "rows": 20800,
+          "mae_thb": 2876.738038350709,
+          "nmae": 0.7856266748128253
+        },
+        {
+          "outer_fold": 4,
+          "rows": 20800,
+          "mae_thb": 2910.96497869151,
+          "nmae": 0.7854229772550548
+        }
+      ],
+      "reported_fold_metrics": [
+        {
+          "fold": 0,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2959.902515879039,
+          "nmae": 0.7728668735780473,
+          "target_sum": 209490800.85,
+          "absolute_error_sum": 61565972.330284014,
+          "seconds": 6.8623934749998625
+        },
+        {
+          "fold": 1,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2945.2330907168202,
+          "nmae": 0.7837867562602173,
+          "target_sum": 222074470.25,
+          "absolute_error_sum": 61260848.28690986,
+          "seconds": 9.23819733099981
+        },
+        {
+          "fold": 2,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2860.2104375561794,
+          "nmae": 0.7865424440217876,
+          "target_sum": 219215850.53000003,
+          "absolute_error_sum": 59492377.10116853,
+          "seconds": 9.340750627000034
+        },
+        {
+          "fold": 3,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2876.738038350709,
+          "nmae": 0.7856266748128253,
+          "target_sum": 219285102.09,
+          "absolute_error_sum": 59836151.19769474,
+          "seconds": 7.112015365999923
+        },
+        {
+          "fold": 4,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2910.96497869151,
+          "nmae": 0.7854229772550548,
+          "target_sum": 221625997.14000002,
+          "absolute_error_sum": 60548071.55678341,
+          "seconds": 9.249431723999805
+        }
+      ],
+      "configuration": {
+        "spec": {
+          "name": "raw-lgb-raw32",
+          "family": "raw_lgb",
+          "feature_set": "raw32"
+        },
+        "cfg": {
+          "seed": 42,
+          "n_splits": 5,
+          "inner_folds": 3,
+          "raw_iterations": 1200,
+          "n_jobs": 12,
+          "gpu": true,
+          "device": "cuda",
+          "gpu_devices": "0",
+          "allow_cpu_fallback": false,
+          "bootstrap_repeats": 1000,
+          "task_dir": "/content/ml004-task3",
+          "data_dir": "/content/ml004-task3/data",
+          "sample_submission_path": "/content/ml004-task3/data/sample_submission.csv",
+          "notebook_path": "/content/ml004-task3/task3_monthly_spending.ipynb",
+          "reference_submission_path": "/content/ml004-task3/reference/previous-submission.csv",
+          "stratify_positive_quantiles": false,
+          "strict_duplicate_groups": true,
+          "source_commit": null,
+          "base_source_commit": "f55210616e71b47c68c4e5c8999ca21d909e88ac",
+          "code_revision_note": "New notebook source is identified by source-bundle SHA256; base commit is not the edited source.",
+          "promote": false,
+          "notebook_source_bundle_sha256": "88f9db688f0bd4e14f12690a001b2d04e9db811b91657340de08e13f174789b2"
+        },
+        "packages": {
+          "numpy": "2.2.6",
+          "pandas": "2.2.3",
+          "scikit-learn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "catboost": "1.2.8",
+          "xgboost": "3.0.2",
+          "joblib": "1.5.1"
+        },
+        "source_metadata": [
+          {
+            "role": "train",
+            "path": "/content/ml004-task3/data/train.csv",
+            "sha256": "fa62c4250acb525d61feae7f53ef7256f58ee38860cc7a172ccc63016a4e314e",
+            "rows": 104000,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment",
+              "spending_30d"
+            ]
+          },
+          {
+            "role": "test_prediction_only",
+            "path": "/content/ml004-task3/data/test.csv",
+            "sha256": "12c8ae5c09353b9c644d858f2cc6115a606336a6b3e0fac7a55e5f903300caef",
+            "rows": 25889,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment"
+            ]
+          },
+          {
+            "role": "canonical_submission_order",
+            "path": "/content/ml004-task3/data/sample_submission.csv",
+            "sha256": "48a77166cd561d5f1633dbd98843484f98275e67665a2c5ddf3d0e04f8adc3a9",
+            "rows": 25889,
+            "columns": [
+              "id",
+              "task1",
+              "task2",
+              "task3",
+              "task4",
+              "task5"
+            ]
+          }
+        ],
+        "train_sha256": "39420194d118d0b4b3d3c9dc4d9f629bc8737b8d787d14e8e652d480082e39fb",
+        "test_sha256": "6cb46652111f67239113ee1aba82c11d36eeae145b3a53fd837645fcdc5a9d6d",
+        "target_sha256": "84fe1c5ef5bdf220582d636eba37a69234ba2233e0821cf95826cdb18fc90cbb",
+        "fold_sha256": "6822bafecb802549f620429093bce68faf7f3d2d7cbca4d8fa9962988bccbab9",
+        "engine_sha256": "011fb100fb42c09fa9406f837e834b5f170b400f564378d7a8bfb83dcc2822f2",
+        "platform": "Linux-6.6.159+-x86_64-with-glibc2.35"
+      }
+    },
+    {
+      "model_variant": "raw-lgb-domain64",
+      "oof_mae_thb": 2926.5447433308755,
+      "oof_nmae": 0.7819848668066057,
+      "fold_mae_mean_thb": 2926.5447433308746,
+      "fold_mae_std_thb": 39.13629623946484,
+      "fold_nmae_mean": 0.781925819537771,
+      "fold_nmae_std": 0.005054010273572727,
+      "oof_rows": 104000,
+      "fold_count": 5,
+      "test_zero_fraction": 0.0035150063733632043,
+      "folds": [
+        {
+          "outer_fold": 0,
+          "rows": 20800,
+          "mae_thb": 2954.8688231009633,
+          "nmae": 0.7731655233975924
+        },
+        {
+          "outer_fold": 1,
+          "rows": 20800,
+          "mae_thb": 2969.3822034418504,
+          "nmae": 0.7823997051066156
+        },
+        {
+          "outer_fold": 2,
+          "rows": 20800,
+          "mae_thb": 2871.0329733857548,
+          "nmae": 0.7859076773604634
+        },
+        {
+          "outer_fold": 3,
+          "rows": 20800,
+          "mae_thb": 2906.7765967098426,
+          "nmae": 0.7838720079666963
+        },
+        {
+          "outer_fold": 4,
+          "rows": 20800,
+          "mae_thb": 2930.663120015963,
+          "nmae": 0.7842841838574865
+        }
+      ],
+      "reported_fold_metrics": [
+        {
+          "fold": 0,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2954.8688231009633,
+          "nmae": 0.7731655233975924,
+          "target_sum": 209490800.85,
+          "absolute_error_sum": 61461271.520500034,
+          "seconds": 12.048588135000045
+        },
+        {
+          "fold": 1,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2969.3822034418504,
+          "nmae": 0.7823997051066156,
+          "target_sum": 222074470.25,
+          "absolute_error_sum": 61763149.83159049,
+          "seconds": 11.994247240999812
+        },
+        {
+          "fold": 2,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2871.0329733857548,
+          "nmae": 0.7859076773604634,
+          "target_sum": 219215850.53000003,
+          "absolute_error_sum": 59717485.8464237,
+          "seconds": 11.934129469000254
+        },
+        {
+          "fold": 3,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2906.7765967098426,
+          "nmae": 0.7838720079666963,
+          "target_sum": 219285102.09,
+          "absolute_error_sum": 60460953.21156473,
+          "seconds": 12.002420839000024
+        },
+        {
+          "fold": 4,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2930.663120015963,
+          "nmae": 0.7842841838574865,
+          "target_sum": 221625997.14000002,
+          "absolute_error_sum": 60957792.89633203,
+          "seconds": 12.00096111699986
+        }
+      ],
+      "configuration": {
+        "spec": {
+          "name": "raw-lgb-domain64",
+          "family": "raw_lgb",
+          "feature_set": "domain"
+        },
+        "cfg": {
+          "seed": 42,
+          "n_splits": 5,
+          "inner_folds": 3,
+          "raw_iterations": 1200,
+          "n_jobs": 12,
+          "gpu": true,
+          "device": "cuda",
+          "gpu_devices": "0",
+          "allow_cpu_fallback": false,
+          "bootstrap_repeats": 1000,
+          "task_dir": "/content/ml004-task3",
+          "data_dir": "/content/ml004-task3/data",
+          "sample_submission_path": "/content/ml004-task3/data/sample_submission.csv",
+          "notebook_path": "/content/ml004-task3/task3_monthly_spending.ipynb",
+          "reference_submission_path": "/content/ml004-task3/reference/previous-submission.csv",
+          "stratify_positive_quantiles": false,
+          "strict_duplicate_groups": true,
+          "source_commit": null,
+          "base_source_commit": "f55210616e71b47c68c4e5c8999ca21d909e88ac",
+          "code_revision_note": "New notebook source is identified by source-bundle SHA256; base commit is not the edited source.",
+          "promote": false,
+          "notebook_source_bundle_sha256": "88f9db688f0bd4e14f12690a001b2d04e9db811b91657340de08e13f174789b2"
+        },
+        "packages": {
+          "numpy": "2.2.6",
+          "pandas": "2.2.3",
+          "scikit-learn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "catboost": "1.2.8",
+          "xgboost": "3.0.2",
+          "joblib": "1.5.1"
+        },
+        "source_metadata": [
+          {
+            "role": "train",
+            "path": "/content/ml004-task3/data/train.csv",
+            "sha256": "fa62c4250acb525d61feae7f53ef7256f58ee38860cc7a172ccc63016a4e314e",
+            "rows": 104000,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment",
+              "spending_30d"
+            ]
+          },
+          {
+            "role": "test_prediction_only",
+            "path": "/content/ml004-task3/data/test.csv",
+            "sha256": "12c8ae5c09353b9c644d858f2cc6115a606336a6b3e0fac7a55e5f903300caef",
+            "rows": 25889,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment"
+            ]
+          },
+          {
+            "role": "canonical_submission_order",
+            "path": "/content/ml004-task3/data/sample_submission.csv",
+            "sha256": "48a77166cd561d5f1633dbd98843484f98275e67665a2c5ddf3d0e04f8adc3a9",
+            "rows": 25889,
+            "columns": [
+              "id",
+              "task1",
+              "task2",
+              "task3",
+              "task4",
+              "task5"
+            ]
+          }
+        ],
+        "train_sha256": "39420194d118d0b4b3d3c9dc4d9f629bc8737b8d787d14e8e652d480082e39fb",
+        "test_sha256": "6cb46652111f67239113ee1aba82c11d36eeae145b3a53fd837645fcdc5a9d6d",
+        "target_sha256": "84fe1c5ef5bdf220582d636eba37a69234ba2233e0821cf95826cdb18fc90cbb",
+        "fold_sha256": "6822bafecb802549f620429093bce68faf7f3d2d7cbca4d8fa9962988bccbab9",
+        "engine_sha256": "011fb100fb42c09fa9406f837e834b5f170b400f564378d7a8bfb83dcc2822f2",
+        "platform": "Linux-6.6.159+-x86_64-with-glibc2.35"
+      }
+    },
+    {
+      "model_variant": "raw-catboost-raw32",
+      "oof_mae_thb": 10488.93895081036,
+      "oof_nmae": 0.5001930249280967,
+      "fold_mae_mean_thb": 10488.93895081036,
+      "fold_mae_std_thb": 245.95498346858253,
+      "fold_nmae_mean": 0.5001930988911341,
+      "fold_nmae_std": 4.254137555970399e-06,
+      "oof_rows": 104000,
+      "fold_count": 5,
+      "test_zero_fraction": 0.0,
+      "folds": [
+        {
+          "outer_fold": 0,
+          "rows": 20800,
+          "mae_thb": 10063.62622956048,
+          "nmae": 0.5001998204270314
+        },
+        {
+          "outer_fold": 1,
+          "rows": 20800,
+          "mae_thb": 10668.512583885431,
+          "nmae": 0.5001907841386537
+        },
+        {
+          "outer_fold": 2,
+          "rows": 20800,
+          "mae_thb": 10531.015531714798,
+          "nmae": 0.5001947783177383
+        },
+        {
+          "outer_fold": 3,
+          "rows": 20800,
+          "mae_thb": 10534.520013668409,
+          "nmae": 0.5001905618353226
+        },
+        {
+          "outer_fold": 4,
+          "rows": 20800,
+          "mae_thb": 10647.020395222684,
+          "nmae": 0.500189549736924
+        }
+      ],
+      "reported_fold_metrics": [
+        {
+          "fold": 0,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 10063.62622956048,
+          "nmae": 0.5001998204270314,
+          "target_sum": 209490800.85,
+          "absolute_error_sum": 209323425.57485795,
+          "seconds": 2.6931925449998744
+        },
+        {
+          "fold": 1,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 10668.512583885431,
+          "nmae": 0.5001907841386537,
+          "target_sum": 222074470.25,
+          "absolute_error_sum": 221905061.74481696,
+          "seconds": 4.651584956000079
+        },
+        {
+          "fold": 2,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 10531.015531714798,
+          "nmae": 0.5001947783177383,
+          "target_sum": 219215850.53000003,
+          "absolute_error_sum": 219045123.0596678,
+          "seconds": 4.88043255599996
+        },
+        {
+          "fold": 3,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 10534.520013668409,
+          "nmae": 0.5001905618353226,
+          "target_sum": 219285102.09,
+          "absolute_error_sum": 219118016.2843029,
+          "seconds": 4.567103585000041
+        },
+        {
+          "fold": 4,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 10647.020395222684,
+          "nmae": 0.500189549736924,
+          "target_sum": 221625997.14000002,
+          "absolute_error_sum": 221458024.22063184,
+          "seconds": 4.837926910000078
+        }
+      ],
+      "configuration": {
+        "spec": {
+          "name": "raw-catboost-raw32",
+          "family": "raw_cb",
+          "feature_set": "raw32"
+        },
+        "cfg": {
+          "seed": 42,
+          "n_splits": 5,
+          "inner_folds": 3,
+          "raw_iterations": 1200,
+          "n_jobs": 12,
+          "gpu": true,
+          "device": "cuda",
+          "gpu_devices": "0",
+          "allow_cpu_fallback": false,
+          "bootstrap_repeats": 1000,
+          "task_dir": "/content/ml004-task3",
+          "data_dir": "/content/ml004-task3/data",
+          "sample_submission_path": "/content/ml004-task3/data/sample_submission.csv",
+          "notebook_path": "/content/ml004-task3/task3_monthly_spending.ipynb",
+          "reference_submission_path": "/content/ml004-task3/reference/previous-submission.csv",
+          "stratify_positive_quantiles": false,
+          "strict_duplicate_groups": true,
+          "source_commit": null,
+          "base_source_commit": "f55210616e71b47c68c4e5c8999ca21d909e88ac",
+          "code_revision_note": "New notebook source is identified by source-bundle SHA256; base commit is not the edited source.",
+          "promote": false,
+          "notebook_source_bundle_sha256": "88f9db688f0bd4e14f12690a001b2d04e9db811b91657340de08e13f174789b2"
+        },
+        "packages": {
+          "numpy": "2.2.6",
+          "pandas": "2.2.3",
+          "scikit-learn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "catboost": "1.2.8",
+          "xgboost": "3.0.2",
+          "joblib": "1.5.1"
+        },
+        "source_metadata": [
+          {
+            "role": "train",
+            "path": "/content/ml004-task3/data/train.csv",
+            "sha256": "fa62c4250acb525d61feae7f53ef7256f58ee38860cc7a172ccc63016a4e314e",
+            "rows": 104000,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment",
+              "spending_30d"
+            ]
+          },
+          {
+            "role": "test_prediction_only",
+            "path": "/content/ml004-task3/data/test.csv",
+            "sha256": "12c8ae5c09353b9c644d858f2cc6115a606336a6b3e0fac7a55e5f903300caef",
+            "rows": 25889,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment"
+            ]
+          },
+          {
+            "role": "canonical_submission_order",
+            "path": "/content/ml004-task3/data/sample_submission.csv",
+            "sha256": "48a77166cd561d5f1633dbd98843484f98275e67665a2c5ddf3d0e04f8adc3a9",
+            "rows": 25889,
+            "columns": [
+              "id",
+              "task1",
+              "task2",
+              "task3",
+              "task4",
+              "task5"
+            ]
+          }
+        ],
+        "train_sha256": "39420194d118d0b4b3d3c9dc4d9f629bc8737b8d787d14e8e652d480082e39fb",
+        "test_sha256": "6cb46652111f67239113ee1aba82c11d36eeae145b3a53fd837645fcdc5a9d6d",
+        "target_sha256": "84fe1c5ef5bdf220582d636eba37a69234ba2233e0821cf95826cdb18fc90cbb",
+        "fold_sha256": "6822bafecb802549f620429093bce68faf7f3d2d7cbca4d8fa9962988bccbab9",
+        "engine_sha256": "011fb100fb42c09fa9406f837e834b5f170b400f564378d7a8bfb83dcc2822f2",
+        "platform": "Linux-6.6.159+-x86_64-with-glibc2.35"
+      }
+    },
+    {
+      "model_variant": "raw-catboost-domain64",
+      "oof_mae_thb": 10488.892887968852,
+      "oof_nmae": 0.5001941228212192,
+      "fold_mae_mean_thb": 10488.892887968852,
+      "fold_mae_std_thb": 245.9626364457905,
+      "fold_nmae_mean": 0.5001942007899425,
+      "fold_nmae_std": 4.511155942222723e-06,
+      "oof_rows": 104000,
+      "fold_count": 5,
+      "test_zero_fraction": 0.0,
+      "folds": [
+        {
+          "outer_fold": 0,
+          "rows": 20800,
+          "mae_thb": 10063.567562428696,
+          "nmae": 0.5002012778364187
+        },
+        {
+          "outer_fold": 1,
+          "rows": 20800,
+          "mae_thb": 10668.47227114301,
+          "nmae": 0.5001917288067218
+        },
+        {
+          "outer_fold": 2,
+          "rows": 20800,
+          "mae_thb": 10530.959938360382,
+          "nmae": 0.5001960980739502
+        },
+        {
+          "outer_fold": 3,
+          "rows": 20800,
+          "mae_thb": 10534.483314161123,
+          "nmae": 0.500191432771203
+        },
+        {
+          "outer_fold": 4,
+          "rows": 20800,
+          "mae_thb": 10646.98135375105,
+          "nmae": 0.5001904664614187
+        }
+      ],
+      "reported_fold_metrics": [
+        {
+          "fold": 0,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 10063.567562428696,
+          "nmae": 0.5002012778364187,
+          "target_sum": 209490800.85,
+          "absolute_error_sum": 209322205.29851687,
+          "seconds": 4.722990292999839
+        },
+        {
+          "fold": 1,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 10668.47227114301,
+          "nmae": 0.5001917288067218,
+          "target_sum": 222074470.25,
+          "absolute_error_sum": 221904223.23977458,
+          "seconds": 4.829233714000111
+        },
+        {
+          "fold": 2,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 10530.959938360382,
+          "nmae": 0.5001960980739502,
+          "target_sum": 219215850.53000003,
+          "absolute_error_sum": 219043966.71789595,
+          "seconds": 4.939465933000065
+        },
+        {
+          "fold": 3,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 10534.483314161123,
+          "nmae": 0.500191432771203,
+          "target_sum": 219285102.09,
+          "absolute_error_sum": 219117252.93455136,
+          "seconds": 4.947122760000184
+        },
+        {
+          "fold": 4,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 10646.98135375105,
+          "nmae": 0.5001904664614187,
+          "target_sum": 221625997.14000002,
+          "absolute_error_sum": 221457212.15802187,
+          "seconds": 4.860179240999969
+        }
+      ],
+      "configuration": {
+        "spec": {
+          "name": "raw-catboost-domain64",
+          "family": "raw_cb",
+          "feature_set": "domain"
+        },
+        "cfg": {
+          "seed": 42,
+          "n_splits": 5,
+          "inner_folds": 3,
+          "raw_iterations": 1200,
+          "n_jobs": 12,
+          "gpu": true,
+          "device": "cuda",
+          "gpu_devices": "0",
+          "allow_cpu_fallback": false,
+          "bootstrap_repeats": 1000,
+          "task_dir": "/content/ml004-task3",
+          "data_dir": "/content/ml004-task3/data",
+          "sample_submission_path": "/content/ml004-task3/data/sample_submission.csv",
+          "notebook_path": "/content/ml004-task3/task3_monthly_spending.ipynb",
+          "reference_submission_path": "/content/ml004-task3/reference/previous-submission.csv",
+          "stratify_positive_quantiles": false,
+          "strict_duplicate_groups": true,
+          "source_commit": null,
+          "base_source_commit": "f55210616e71b47c68c4e5c8999ca21d909e88ac",
+          "code_revision_note": "New notebook source is identified by source-bundle SHA256; base commit is not the edited source.",
+          "promote": false,
+          "notebook_source_bundle_sha256": "88f9db688f0bd4e14f12690a001b2d04e9db811b91657340de08e13f174789b2"
+        },
+        "packages": {
+          "numpy": "2.2.6",
+          "pandas": "2.2.3",
+          "scikit-learn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "catboost": "1.2.8",
+          "xgboost": "3.0.2",
+          "joblib": "1.5.1"
+        },
+        "source_metadata": [
+          {
+            "role": "train",
+            "path": "/content/ml004-task3/data/train.csv",
+            "sha256": "fa62c4250acb525d61feae7f53ef7256f58ee38860cc7a172ccc63016a4e314e",
+            "rows": 104000,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment",
+              "spending_30d"
+            ]
+          },
+          {
+            "role": "test_prediction_only",
+            "path": "/content/ml004-task3/data/test.csv",
+            "sha256": "12c8ae5c09353b9c644d858f2cc6115a606336a6b3e0fac7a55e5f903300caef",
+            "rows": 25889,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment"
+            ]
+          },
+          {
+            "role": "canonical_submission_order",
+            "path": "/content/ml004-task3/data/sample_submission.csv",
+            "sha256": "48a77166cd561d5f1633dbd98843484f98275e67665a2c5ddf3d0e04f8adc3a9",
+            "rows": 25889,
+            "columns": [
+              "id",
+              "task1",
+              "task2",
+              "task3",
+              "task4",
+              "task5"
+            ]
+          }
+        ],
+        "train_sha256": "39420194d118d0b4b3d3c9dc4d9f629bc8737b8d787d14e8e652d480082e39fb",
+        "test_sha256": "6cb46652111f67239113ee1aba82c11d36eeae145b3a53fd837645fcdc5a9d6d",
+        "target_sha256": "84fe1c5ef5bdf220582d636eba37a69234ba2233e0821cf95826cdb18fc90cbb",
+        "fold_sha256": "6822bafecb802549f620429093bce68faf7f3d2d7cbca4d8fa9962988bccbab9",
+        "engine_sha256": "011fb100fb42c09fa9406f837e834b5f170b400f564378d7a8bfb83dcc2822f2",
+        "platform": "Linux-6.6.159+-x86_64-with-glibc2.35"
+      }
+    },
+    {
+      "model_variant": "raw-xgboost-domain64",
+      "oof_mae_thb": 2904.626520709712,
+      "oof_nmae": 0.7832637911569577,
+      "fold_mae_mean_thb": 2904.626520709712,
+      "fold_mae_std_thb": 30.987342750257348,
+      "fold_nmae_mean": 0.7832004303245104,
+      "fold_nmae_std": 0.005034027042141426,
+      "oof_rows": 104000,
+      "fold_count": 5,
+      "test_zero_fraction": 0.0021244544014832555,
+      "folds": [
+        {
+          "outer_fold": 0,
+          "rows": 20800,
+          "mae_thb": 2935.5137583882843,
+          "nmae": 0.7743160157278273
+        },
+        {
+          "outer_fold": 1,
+          "rows": 20800,
+          "mae_thb": 2939.153118055725,
+          "nmae": 0.7841367465972321
+        },
+        {
+          "outer_fold": 2,
+          "rows": 20800,
+          "mae_thb": 2871.961345536731,
+          "nmae": 0.7858532739050805
+        },
+        {
+          "outer_fold": 3,
+          "rows": 20800,
+          "mae_thb": 2881.4881965104837,
+          "nmae": 0.7853486772330046
+        },
+        {
+          "outer_fold": 4,
+          "rows": 20800,
+          "mae_thb": 2895.016185057339,
+          "nmae": 0.7863474381594066
+        }
+      ],
+      "reported_fold_metrics": [
+        {
+          "fold": 0,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2935.5137583882843,
+          "nmae": 0.7743160157278273,
+          "target_sum": 209490800.85,
+          "absolute_error_sum": 61058686.17447631,
+          "seconds": 6.396915080000326
+        },
+        {
+          "fold": 1,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2939.153118055725,
+          "nmae": 0.7841367465972321,
+          "target_sum": 222074470.25,
+          "absolute_error_sum": 61134384.85555908,
+          "seconds": 5.719590162999793
+        },
+        {
+          "fold": 2,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2871.961345536731,
+          "nmae": 0.7858532739050805,
+          "target_sum": 219215850.53000003,
+          "absolute_error_sum": 59736795.987164006,
+          "seconds": 5.695301780000136
+        },
+        {
+          "fold": 3,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2881.4881965104837,
+          "nmae": 0.7853486772330046,
+          "target_sum": 219285102.09,
+          "absolute_error_sum": 59934954.48741806,
+          "seconds": 5.69132442199998
+        },
+        {
+          "fold": 4,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2895.016185057339,
+          "nmae": 0.7863474381594066,
+          "target_sum": 221625997.14000002,
+          "absolute_error_sum": 60216336.64919265,
+          "seconds": 5.6737157679999655
+        }
+      ],
+      "configuration": {
+        "spec": {
+          "name": "raw-xgboost-domain64",
+          "family": "raw_xgb",
+          "feature_set": "domain"
+        },
+        "cfg": {
+          "seed": 42,
+          "n_splits": 5,
+          "inner_folds": 3,
+          "raw_iterations": 1200,
+          "n_jobs": 12,
+          "gpu": true,
+          "device": "cuda",
+          "gpu_devices": "0",
+          "allow_cpu_fallback": false,
+          "bootstrap_repeats": 1000,
+          "task_dir": "/content/ml004-task3",
+          "data_dir": "/content/ml004-task3/data",
+          "sample_submission_path": "/content/ml004-task3/data/sample_submission.csv",
+          "notebook_path": "/content/ml004-task3/task3_monthly_spending.ipynb",
+          "reference_submission_path": "/content/ml004-task3/reference/previous-submission.csv",
+          "stratify_positive_quantiles": false,
+          "strict_duplicate_groups": true,
+          "source_commit": null,
+          "base_source_commit": "f55210616e71b47c68c4e5c8999ca21d909e88ac",
+          "code_revision_note": "New notebook source is identified by source-bundle SHA256; base commit is not the edited source.",
+          "promote": false,
+          "notebook_source_bundle_sha256": "88f9db688f0bd4e14f12690a001b2d04e9db811b91657340de08e13f174789b2"
+        },
+        "packages": {
+          "numpy": "2.2.6",
+          "pandas": "2.2.3",
+          "scikit-learn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "catboost": "1.2.8",
+          "xgboost": "3.0.2",
+          "joblib": "1.5.1"
+        },
+        "source_metadata": [
+          {
+            "role": "train",
+            "path": "/content/ml004-task3/data/train.csv",
+            "sha256": "fa62c4250acb525d61feae7f53ef7256f58ee38860cc7a172ccc63016a4e314e",
+            "rows": 104000,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment",
+              "spending_30d"
+            ]
+          },
+          {
+            "role": "test_prediction_only",
+            "path": "/content/ml004-task3/data/test.csv",
+            "sha256": "12c8ae5c09353b9c644d858f2cc6115a606336a6b3e0fac7a55e5f903300caef",
+            "rows": 25889,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment"
+            ]
+          },
+          {
+            "role": "canonical_submission_order",
+            "path": "/content/ml004-task3/data/sample_submission.csv",
+            "sha256": "48a77166cd561d5f1633dbd98843484f98275e67665a2c5ddf3d0e04f8adc3a9",
+            "rows": 25889,
+            "columns": [
+              "id",
+              "task1",
+              "task2",
+              "task3",
+              "task4",
+              "task5"
+            ]
+          }
+        ],
+        "train_sha256": "39420194d118d0b4b3d3c9dc4d9f629bc8737b8d787d14e8e652d480082e39fb",
+        "test_sha256": "6cb46652111f67239113ee1aba82c11d36eeae145b3a53fd837645fcdc5a9d6d",
+        "target_sha256": "84fe1c5ef5bdf220582d636eba37a69234ba2233e0821cf95826cdb18fc90cbb",
+        "fold_sha256": "6822bafecb802549f620429093bce68faf7f3d2d7cbca4d8fa9962988bccbab9",
+        "engine_sha256": "011fb100fb42c09fa9406f837e834b5f170b400f564378d7a8bfb83dcc2822f2",
+        "platform": "Linux-6.6.159+-x86_64-with-glibc2.35"
+      }
+    },
+    {
+      "model_variant": "calibrated-mixture-quantile",
+      "oof_mae_thb": 2868.765675098176,
+      "oof_nmae": 0.7853653106119595,
+      "fold_mae_mean_thb": 2868.7656750981755,
+      "fold_mae_std_thb": 35.6538834173902,
+      "fold_nmae_mean": 0.7853037448068182,
+      "fold_nmae_std": 0.005088003347265725,
+      "oof_rows": 104000,
+      "fold_count": 5,
+      "test_zero_fraction": 0.45764610452315657,
+      "folds": [
+        {
+          "outer_fold": 0,
+          "rows": 20800,
+          "mae_thb": 2901.786110789775,
+          "nmae": 0.7763290376403502
+        },
+        {
+          "outer_fold": 1,
+          "rows": 20800,
+          "mae_thb": 2898.6064735815617,
+          "nmae": 0.7864788089389091
+        },
+        {
+          "outer_fold": 2,
+          "rows": 20800,
+          "mae_thb": 2821.841586848285,
+          "nmae": 0.7888011508858037
+        },
+        {
+          "outer_fold": 3,
+          "rows": 20800,
+          "mae_thb": 2841.1107005424997,
+          "nmae": 0.7877180144932098
+        },
+        {
+          "outer_fold": 4,
+          "rows": 20800,
+          "mae_thb": 2880.4835037287567,
+          "nmae": 0.7871917120758185
+        }
+      ],
+      "reported_fold_metrics": [
+        {
+          "fold": 0,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2901.786110789775,
+          "nmae": 0.7763290376403502,
+          "target_sum": 209490800.85,
+          "absolute_error_sum": 60357151.10442732,
+          "seconds": 91.17798847999984
+        },
+        {
+          "fold": 1,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2898.6064735815617,
+          "nmae": 0.7864788089389091,
+          "target_sum": 222074470.25,
+          "absolute_error_sum": 60291014.65049648,
+          "seconds": 93.04161223599976
+        },
+        {
+          "fold": 2,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2821.841586848285,
+          "nmae": 0.7888011508858037,
+          "target_sum": 219215850.53000003,
+          "absolute_error_sum": 58694305.00644433,
+          "seconds": 89.7418699320001
+        },
+        {
+          "fold": 3,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2841.1107005424997,
+          "nmae": 0.7877180144932098,
+          "target_sum": 219285102.09,
+          "absolute_error_sum": 59095102.571283996,
+          "seconds": 91.2232226760002
+        },
+        {
+          "fold": 4,
+          "n_train": 83200,
+          "n_valid": 20800,
+          "mae": 2880.4835037287567,
+          "nmae": 0.7871917120758185,
+          "target_sum": 221625997.14000002,
+          "absolute_error_sum": 59914056.877558134,
+          "seconds": 89.66322859599995
+        }
+      ],
+      "configuration": {
+        "spec": {
+          "name": "calibrated-mixture-quantile",
+          "family": "mixture_quantile",
+          "feature_set": "domain"
+        },
+        "cfg": {
+          "seed": 42,
+          "n_splits": 5,
+          "inner_folds": 3,
+          "raw_iterations": 1200,
+          "n_jobs": 12,
+          "gpu": true,
+          "device": "cuda",
+          "gpu_devices": "0",
+          "allow_cpu_fallback": false,
+          "bootstrap_repeats": 1000,
+          "task_dir": "/content/ml004-task3",
+          "data_dir": "/content/ml004-task3/data",
+          "sample_submission_path": "/content/ml004-task3/data/sample_submission.csv",
+          "notebook_path": "/content/ml004-task3/task3_monthly_spending.ipynb",
+          "reference_submission_path": "/content/ml004-task3/reference/previous-submission.csv",
+          "stratify_positive_quantiles": false,
+          "strict_duplicate_groups": true,
+          "source_commit": null,
+          "base_source_commit": "f55210616e71b47c68c4e5c8999ca21d909e88ac",
+          "code_revision_note": "New notebook source is identified by source-bundle SHA256; base commit is not the edited source.",
+          "promote": false,
+          "notebook_source_bundle_sha256": "88f9db688f0bd4e14f12690a001b2d04e9db811b91657340de08e13f174789b2"
+        },
+        "packages": {
+          "numpy": "2.2.6",
+          "pandas": "2.2.3",
+          "scikit-learn": "1.6.1",
+          "lightgbm": "4.6.0",
+          "catboost": "1.2.8",
+          "xgboost": "3.0.2",
+          "joblib": "1.5.1"
+        },
+        "source_metadata": [
+          {
+            "role": "train",
+            "path": "/content/ml004-task3/data/train.csv",
+            "sha256": "fa62c4250acb525d61feae7f53ef7256f58ee38860cc7a172ccc63016a4e314e",
+            "rows": 104000,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment",
+              "spending_30d"
+            ]
+          },
+          {
+            "role": "test_prediction_only",
+            "path": "/content/ml004-task3/data/test.csv",
+            "sha256": "12c8ae5c09353b9c644d858f2cc6115a606336a6b3e0fac7a55e5f903300caef",
+            "rows": 25889,
+            "columns": [
+              "player_id",
+              "friend_count",
+              "social_interactions",
+              "guild_membership",
+              "event_participation_rate",
+              "daily_login_streak",
+              "avg_session_length",
+              "sessions_per_week",
+              "total_playtime_hours",
+              "days_since_last_login",
+              "achievement_count",
+              "achievement_completion_rate",
+              "historical_spending",
+              "prev_month_spending",
+              "total_transactions",
+              "avg_transaction_value",
+              "account_age_days",
+              "vip_status",
+              "is_premium_member",
+              "primary_game",
+              "games_played",
+              "cross_game_activity",
+              "platform",
+              "days_since_last_purchase",
+              "purchase_frequency",
+              "payment_methods_used",
+              "purchases_on_discount",
+              "discount_rate_used",
+              "seasonal_spending_pattern",
+              "owns_limited_edition",
+              "competitive_rank",
+              "tournament_participation",
+              "segment"
+            ]
+          },
+          {
+            "role": "canonical_submission_order",
+            "path": "/content/ml004-task3/data/sample_submission.csv",
+            "sha256": "48a77166cd561d5f1633dbd98843484f98275e67665a2c5ddf3d0e04f8adc3a9",
+            "rows": 25889,
+            "columns": [
+              "id",
+              "task1",
+              "task2",
+              "task3",
+              "task4",
+              "task5"
+            ]
+          }
+        ],
+        "train_sha256": "39420194d118d0b4b3d3c9dc4d9f629bc8737b8d787d14e8e652d480082e39fb",
+        "test_sha256": "6cb46652111f67239113ee1aba82c11d36eeae145b3a53fd837645fcdc5a9d6d",
+        "target_sha256": "84fe1c5ef5bdf220582d636eba37a69234ba2233e0821cf95826cdb18fc90cbb",
+        "fold_sha256": "6822bafecb802549f620429093bce68faf7f3d2d7cbca4d8fa9962988bccbab9",
+        "engine_sha256": "011fb100fb42c09fa9406f837e834b5f170b400f564378d7a8bfb83dcc2822f2",
+        "platform": "Linux-6.6.159+-x86_64-with-glibc2.35"
+      }
+    }
+  ],
+  "paired_row_bootstrap": {
+    "candidate_minus_baseline_mae_thb": 0.0,
+    "ci95_lower_thb": 0.0,
+    "ci95_upper_thb": 0.0,
+    "repeats": 1000,
+    "seed": 42,
+    "resampling_unit": "labeled row, paired on identical saved OOF predictions",
+    "interpretation": "Conditional descriptive interval. CV training sets overlap; candidate selection and hyperparameter tuning are not repeated in this bootstrap. This is not independent confirmation, a corrected CV significance test, or a p-value.",
+    "baseline": "legacy-hurdle-fixed",
+    "candidate": "legacy-hurdle-fixed"
+  },
+  "test_prediction_drift": {
+    "reference_available": true,
+    "candidate_distribution": {
+      "rows": 25889,
+      "zero_fraction": 0.48912665610877204,
+      "mean_thb": 10217.350716529754,
+      "median_thb": 88.9831750820277,
+      "p99_thb": 128891.76517943034,
+      "max_thb": 256401.77923958006,
+      "min_thb": 0.0
+    },
+    "reference_distribution": {
+      "rows": 25889,
+      "zero_fraction": 0.5053883888910348,
+      "mean_thb": 10476.282515354013,
+      "median_thb": 0.0,
+      "p99_thb": 132322.8899999997,
+      "max_thb": 265404.93,
+      "min_thb": 0.0
+    },
+    "prediction_mae_difference_thb": 285.85718676997953,
+    "pearson_correlation": 0.9997747527479055,
+    "spearman_correlation": 0.9921660045903108,
+    "zero_status_flip_fraction": 0.0163389856695894,
+    "prediction_value_changed_fraction": 0.5109119703348912
+  },
+  "promotion_requested": false,
+  "promotion_performed": false,
+  "go_no_go": "REVIEW_REQUIRED: candidate selection is development evidence; no Kaggle submission authorized by this export.",
+  "feature_importance_status": "Mean normalized importance of outer fitted estimators; mixed engine conventions, not SHAP",
+  "report_assets_complete": true,
+  "export_validation": {
+    "rows": 25889,
+    "columns": [
+      "id",
+      "task3"
+    ],
+    "canonical_order": true,
+    "finite_nonnegative_raw_thb": true,
+    "test_csv_exact_roundtrip_match": true
+  }
+}

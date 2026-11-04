@@ -1,0 +1,26 @@
+{
+  "reference_available": true,
+  "candidate_distribution": {
+    "rows": 25889,
+    "zero_fraction": 0.48912665610877204,
+    "mean_thb": 10217.350716529754,
+    "median_thb": 88.9831750820277,
+    "p99_thb": 128891.76517943034,
+    "max_thb": 256401.77923958006,
+    "min_thb": 0.0
+  },
+  "reference_distribution": {
+    "rows": 25889,
+    "zero_fraction": 0.5053883888910348,
+    "mean_thb": 10476.282515354013,
+    "median_thb": 0.0,
+    "p99_thb": 132322.8899999997,
+    "max_thb": 265404.93,
+    "min_thb": 0.0
+  },
+  "prediction_mae_difference_thb": 285.85718676997953,
+  "pearson_correlation": 0.9997747527479055,
+  "spearman_correlation": 0.9921660045903108,
+  "zero_status_flip_fraction": 0.0163389856695894,
+  "prediction_value_changed_fraction": 0.5109119703348912
+}
