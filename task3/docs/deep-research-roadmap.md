@@ -10,6 +10,14 @@ Historical notebook/README claims of NMAE 0.7889/0.7897 have no committed OOF ar
 
 Only train.csv and test.csv are present in the supplied mirror and examined branch trees. No separate Val source or proof of prior pooling was found. The loader combines an available val.csv/validation.csv but records supplied_train_only_unverified_pooling for the current files. This unresolved provenance cannot be repaired by inventing validation data.
 
+## Latest hosted experiment
+
+Run `task3-kaggle-gpu-v4` completed on Kaggle with 2× Tesla T4 15,360 MiB, 31.35 GiB RAM, Python 3.13.16, and Kaggle's preinstalled numerical/model packages. Their versions differed from `uv.lock`; the run recorded actual versions and pin deltas rather than installing over the active numerical stack. The pinned Train/Test/sample-submission content hashes matched, all candidates shared the same five outer folds, and Test remained inference/output QA only. No separate Validation file or pooling history was verified.
+
+The best measured candidate is the frozen hurdle at pooled OOF MAE 2,815.03 THB / NMAE 0.788536. The scaled CatBoost runner-up reached 2,819.32 / 0.788282, 4.285 THB worse. A conditional paired row-bootstrap comparison did not establish a difference. The older A100 run scored 0.787507 on a different hardware/package stack, so the small score shift is not attributable to the model. Reaching NMAE 0.90 requires MAE at or below 1,166.34 THB, a 58.6% reduction; this remains an unachieved aspiration.
+
+The next notebook candidate is a nested segment-3 specialist blend. For each outer fold, two inner folds produce out-of-fold predictions for the frozen hurdle and a CatBoost raw-THB MAE expert trained only on segment-3 rows. A small predeclared blend grid is selected on segment-3 inner OOF MAE, then scored once on the untouched outer fold. Non-segment-3 rows retain the hurdle baseline. This fixed candidate is motivated by earlier OOF slice diagnostics, so even its outer OOF result remains development evidence rather than independent confirmation. It has not yet been executed because Colab reported no available GPU on 2026-11-05.
+
 ## Objective and mathematical choices
 
 For a fixed cohort with positive total target, maximizing
@@ -44,9 +52,9 @@ Gains are hypotheses until measured. Cost is relative to one fixed-budget five-f
 | 1 | Frozen historical hurdle rerun | Establish a reproducible reference with actual OOF/model evidence | 8 estimators per outer fold | Same data/folds; frozen gating/blend/scale; do not copy historical scores |
 | 2 | Raw-THB L1 LightGBM/CatBoost/XGBoost | Optimize metric-relevant loss directly; test model diversity | 1x per configuration | Raw32/domain64 ablation; fixed iteration budgets |
 | 3 | Calibrated mixture median | Correct the positive-median shortcut near p=0.5 | About 11 fitted objects per outer fold | Inner OOF calibration, seven positive quantiles, held-out probability diagnostics |
-| 4 | Scale-normalized weighted L1 | Test strong monetary scale with a loss algebraically equivalent to raw MAE | 1x per configuration | Train-only proxy, positive weights, identity assertion, paired OOF comparison |
-| 5 | Monetary proxy and missingness ablation | Exploit nearly redundant spending history when one input is missing | 1x | Preserve original values/NaNs; fit proxy ratio and fallback in training fold |
-| 6 | Segment 3 specialist | Focus capacity on the largest revenue/error contribution | 1–2x | Inner-validated blend and global fallback; no outer-label blend selection |
+| 4 | Scale-normalized weighted L1 | Test strong monetary scale with a loss algebraically equivalent to raw MAE | Completed: 3 candidates | Train-only proxy and positive weights; monetary CatBoost is 4.285 THB MAE worse than the frozen reference, fixed-scale CatBoost and scaled LightGBM are worse |
+| 5 | Monetary proxy and missingness ablation | Exploit nearly redundant spending history when one input is missing | Completed within the scale experiment | Preserve original values/NaNs; fit proxy ratio and fallback in the training fold; do not promote the worse candidates |
+| 6 | Nested segment 3 specialist blend | Focus capacity on the largest revenue/error contribution | Prepared; not yet executed | Two inner OOF folds within each outer-training partition select a fixed-grid blend; no outer-label weight selection; global baseline fallback |
 | 7 | Nested Optuna on the strongest family | Spend compute on a supported hypothesis | Trials × inner folds × outer folds | Store trial history; choose params only inside outer training |
 | 8 | From-scratch MLP/residual blend | Add diversity if tree residuals justify it | Requires measured GPU pilot | Fold-local imputation/scaling; inner stopping/blend; no pretrained tabular weights |
 
@@ -54,7 +62,7 @@ Tweedie/Gamma/Poisson and Huber losses are alternatives rather than automaticall
 
 ## Execution and evidence protocol
 
-1. Pin the numerical/model stack in task3/pyproject.toml and uv.lock. The Colab bootstrap installs matching direct dependency versions before imports. Record actual packages, Python, platform, GPU/driver and RAM.
+1. Pin the numerical/model stack in task3/pyproject.toml and uv.lock. Colab installs exact direct pins before imports; Kaggle records its preinstalled versions and pin differences without mutating the active numerical stack. Record actual packages, Python, platform, GPU/driver and RAM.
 2. Download only authorized Task 3 files into the cloud runtime from the immutable supplied mirror; validate content hashes and canonical submission order. Local work uses existing supplied data.
 3. Use the same five seeded stratified outer folds for every candidate. All learned aggregates, calibration and model fitting exclude the outer validation rows. Test is inference/output QA only.
 4. Save actual fitted models, feature columns, configuration and per-fold OOF/test arrays. Resume only after semantic-code/data/fold/config/model hashes match.
