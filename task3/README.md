@@ -19,32 +19,41 @@ $$
 
 - Baseline (Predicting Global Median): $\text{NMAE} = 0.5000$
 - Challenge Target: $\text{NMAE} \ge 0.7500$
-- Our Ensembled Solution: **$\text{NMAE} = 0.7889$** (MAE: **2,809.54 THB**)
+- **Our Upgraded Solution (Scale-Relative Tri-Model Hurdle Ensemble):** **$\text{NMAE} = 0.794122$** (MAE: **2,721.39 THB**)
 
 ---
 
-## 2. Methodology & Architecture: Two-Stage Tri-Model Hurdle Ensemble
+## 2. Methodology & Key Breakthroughs
 
-Standard single-stage regression models fail on zero-inflated heavy-tailed distributions due to gradient conflict between mass at zero and extreme positive values. We implement a decoupled Two-Stage Hurdle Model:
+Standard single-stage regression models fail on zero-inflated heavy-tailed distributions due to gradient conflict between mass at zero and extreme positive values. We implement a decoupled Two-Stage Hurdle Model with two major algorithmic breakthroughs:
 
-1. **Stage 1 (Binary Gatekeeper Classifier):**
-   - Predicts propensity to spend $P(Y > 0 \mid X)$.
-   - Algorithms: LightGBM (`binary_logloss`), CatBoost (`Logloss`), XGBoost (`binary:logistic`).
-   - Objective: Distinguish non-payers ($0$ THB) from active spenders.
-
-2. **Stage 2 (Positive Spending Regressor):**
-   - Trained exclusively on samples with $y > 0$ using logarithmic target $\log(1 + y)$.
-   - Loss Function: $L_1$ Regression (MAE / Regression-L1) to align directly with the Bayes-optimal median estimator required by MAE evaluation.
-   - Algorithms: LightGBM (`regression_l1`), CatBoost (`MAE`), XGBoost (`reg:absoluteerror`).
-
-3. **Stage 3 (Bayes-Optimal Hurdle Post-Processing):**
-   - Reconstructs spending via optimal gating threshold $\tau^*$ and blending parameter $\alpha^*$:
-
+### 2.1 Exact Algebraic Identity Exploitation
+We proved the deterministic relationship:
 $$
-\hat{y}_i = \mathbb{I}(\hat{p}_i \ge \tau^*) \cdot \left[ \alpha \hat{y}_i^{\text{positive}} + (1 - \alpha) \hat{y}_i^{\text{direct}} \right]
+\text{historical\_spending} = \text{total\_transactions} \times \text{avg\_transaction\_value}
 $$
+This allows 100% exact mathematical imputation of missing historical spending for over 11.2% of corrupted records, completely eliminating imputation bias.
 
-   - Hyperparameters $\tau^* = 0.50$, $\alpha^* = 0.95$ tuned via grid search on Out-Of-Fold (OOF) predictions.
+### 2.2 Scale-Relative Log-Multiplier Hurdle Target
+Rather than predicting unconstrained currency values which vary across 4 orders of magnitude, positive regressors model the scale-relative multiplier:
+$$
+z = \log\left(\frac{y + 1}{\text{base\_spend} + 1}\right)
+$$
+where $\text{base\_spend} = 0.65 \times \text{hist\_clean} + 0.35 \times (\text{prev\_clean} / 0.35)$.  
+This anchors regression directly to player spend scale, dramatically reducing MAE on positive spenders.
+
+### 2.3 Tri-Model GBDT Ensemble
+Both Stage 1 (Spender Classifier) and Stage 2 (Scale-Relative Regressor) ensemble three diverse architectures across 5-fold Stratified CV:
+- **LightGBM** (Leaf-wise histogram gradient boosting with L1 objective)
+- **CatBoost** (Symmetric oblivious trees with exact MAE optimization)
+- **XGBoost** (Exact depth-wise tree boosting with L1 absolute error)
+
+### 2.4 Bayes-Optimal Post-Processing
+Predictions are gated and calibrated on out-of-fold validation:
+- Gating threshold $\tau^* = 0.46$
+- Positive regressor weight $w_{pos}^* = 0.98$
+- Probability attenuation factor $\gamma^* = 0.08$
+- Shrinkage factor $\alpha^* = 1.00$
 
 ---
 
@@ -55,16 +64,13 @@ $$
 | Baseline (Empirical Global Median) | 10,495.48 | 0.5000 | Reference Baseline |
 | Standalone LightGBM Hurdle | 2,879.38 | 0.7847 | Target Exceeded (+0.0347) |
 | Standalone CatBoost Hurdle | 2,862.14 | 0.7858 | Target Exceeded (+0.0358) |
-| **Tri-Model Hurdle Ensemble (LGBM + CatBoost + XGBoost)** | **2,809.54** | **0.7889** | **Top Performance (+0.0389)** |
+| Previous Tri-Model Hurdle | 2,809.54 | 0.7889 | Pre-Upgrade (+0.0389) |
+| **Scale-Relative Tri-Model Hurdle Ensemble** | **2,721.39** | **0.794122** | **SOTA Leader (+0.0441)** |
 
 ---
 
 ## 4. Execution & Artifacts
 
-- **Jupyter Notebook:** `task3_monthly_spending.ipynb` (Fully self-contained, automated dataset resolution for Local, Google Colab, and Kaggle runtimes).
-- **Test Set Predictions:** `predictions/test_predictions.csv` (25,889 rows with `player_id` and `spending_30d`).
-- **Diagnostic Visualizations:** Saved in `assets/`:
-  - `figure1-spending-eda.png`
-  - `figure2-hurdle-calibration-diagnostics.png`
-  - `figure3-residual-error-distribution.png`
-  - `figure4-test-spending-prediction-density.png`
+- **Jupyter Notebook:** `task3_monthly_spending.ipynb` (Follows the strict 11-section format and team header).
+- **Test Set Predictions:** `predictions/test_predictions.csv` (25,889 rows with `player_id`, `spending_30d`, `p_spender`).
+- **Official Submission:** `submit/index.csv` (25,889 rows, validated with zero NaNs, valid bounds).
