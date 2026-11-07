@@ -6,3 +6,6 @@ __pycache__/
 # uv virtual environment
 .venv/
 
+# Local dataset
+data/
+
