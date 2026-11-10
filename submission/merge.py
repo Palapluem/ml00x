@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 TASKS = ("task1", "task2", "task3", "task4", "task5")
-TASK4_LABELS = {"7-11K", "fiveN", "freefried", "pube", "roblock"}
+TASK4_LABELS = {"0", "1", "2", "3", "4"}
 SAMPLE = Path("submission/sample_submission.csv")
 
 

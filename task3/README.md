@@ -10,7 +10,7 @@
 ## 1. Problem Formulation & Metric
 
 - **Target Variable:** `spending_30d` ($\ge 0.0$ THB).
-- **Data Characteristics:** Zero-inflated continuous distribution (~50.5% exact zero spending, heavy Pareto tail among positive spenders up to 265,404 THB).
+- **Data Characteristics:** Zero-inflated continuous distribution (48.12% exact zero spending; observed target range $0$–$300{,}000$ THB).
 - **Official Competition Metric:** Normalized Mean Absolute Error (NMAE)
 
 $$
@@ -19,58 +19,50 @@ $$
 
 - Baseline (Predicting Global Median): $\text{NMAE} = 0.5000$
 - Challenge Target: $\text{NMAE} \ge 0.7500$
-- **Our Upgraded Solution (Scale-Relative Tri-Model Hurdle Ensemble):** **$\text{NMAE} = 0.794122$** (MAE: **2,721.39 THB**)
+- **Previous Frozen Benchmark (Nested 5-Fold OOF):** $\text{NMAE} = 0.7896088679$ (MAE: $2{,}796.9345$ THB; $N=104{,}000$).
+- **Promotion status (2026-11-10): Not promoted.** Champion reference: $0.7917806249$; strict gate: $>0.791781$ plus a positive same-row 95% paired-bootstrap CI. The available scratch bundle recomputes to NMAE $0.7917661927$ (MAE $2{,}760.7124$ THB); its evaluation is not valid nested CV, the champion OOF vector is absent, and its test array differs from current CSV artifacts.
 
 ---
 
 ## 2. Methodology & Key Breakthroughs
 
-Standard single-stage regression models fail on zero-inflated heavy-tailed distributions due to gradient conflict between mass at zero and extreme positive values. We implement a decoupled Two-Stage Hurdle Model with two major algorithmic breakthroughs:
+Standard single-stage regression models suffer from gradient conflict between the point mass at zero ($48.12\%$) and the heavy-tailed whale distribution. Conversely, pure log-multiplier models suffer from exponential error amplification on high-value whales. The candidate architecture under evaluation combines a **3-Family Scale-Relative Log-Multiplier Two-Stage Hurdle** with **Direct Raw-Scale L1 Regressors** and a **Level-2 `LGBM(MAE)` Meta-Stacker**:
 
-### 2.1 Exact Algebraic Identity Exploitation
-We proved the deterministic relationship:
-$$
-\text{historical\_spending} = \text{total\_transactions} \times \text{avg\_transaction\_value}
-$$
-This allows 100% exact mathematical imputation of missing historical spending for over 11.2% of corrupted records, completely eliminating imputation bias.
+### 2.1 High-Fidelity Spending Reconstruction (Fold-Local Empirical Proxy)
+Empirical analysis of 86,961 non-null training records reveals that:
 
-### 2.2 Scale-Relative Log-Multiplier Hurdle Target
-Rather than predicting unconstrained currency values which vary across 4 orders of magnitude, positive regressors model the scale-relative multiplier:
 $$
-z = \log\left(\frac{y + 1}{\text{base\_spend} + 1}\right)
+\text{historical\_spending} \approx \text{total\_transactions} \times \text{avg\_transaction\_value}
 $$
-where $\text{base\_spend} = 0.65 \times \text{hist\_clean} + 0.35 \times (\text{prev\_clean} / 0.35)$.  
-This anchors regression directly to player spend scale, dramatically reducing MAE on positive spenders.
 
-### 2.3 Tri-Model GBDT Ensemble
-Both Stage 1 (Spender Classifier) and Stage 2 (Scale-Relative Regressor) ensemble three diverse architectures across 5-fold Stratified CV:
-- **LightGBM** (Leaf-wise histogram gradient boosting with L1 objective)
-- **CatBoost** (Symmetric oblivious trees with exact MAE optimization)
-- **XGBoost** (Exact depth-wise tree boosting with L1 absolute error)
+holds within $0.01$ THB for **99.00%** of records ($86{,}093 / 86{,}961$). Exactly 868 records ($1.00\%$) deviate by $> 1.00$ THB (median discrepancy $857.31$ THB). Within each validation fold, the complementary ratio `prev_to_hist` and feature medians are estimated strictly on that fold's training partition to prevent cross-fold leakage.
 
-### 2.4 Bayes-Optimal Post-Processing
-Predictions are gated and calibrated on out-of-fold validation:
-- Gating threshold $\tau^* = 0.46$
-- Positive regressor weight $w_{pos}^* = 0.98$
-- Probability attenuation factor $\gamma^* = 0.08$
-- Shrinkage factor $\alpha^* = 1.00$
+### 2.2 Hybrid Two-Stage Hurdle + Direct Raw-Scale L1 Stacking
+1. **Stage 1 Spender Gatekeeper ($P(\text{spending}_{30\text{d}} > 0)$):** Tri-model probability ensemble of `LGBMClassifier`, `CatBoostClassifier`, and `XGBClassifier`, calibrated via fold-local `IsotonicRegression`.
+2. **Stage 2 Scale-Relative Log-Multiplier Regressors:** Trained on positive spenders using target $z_i = \ln(1 + y_i / \max(\text{prev\_clean}_i, 100))$ across `LGBMRegressor(regression_l1)`, `CatBoostRegressor(MAE)`, and `XGBRegressor(reg:absoluteerror)`.
+3. **Direct Raw-Scale L1 Regressors:** Trained on the full cohort directly in raw THB scale (`LGBMRegressor(mae)`, `CatBoostRegressor(MAE)`, `XGBRegressor(reg:absoluteerror)`) so leaf medians anchor extreme whale predictions without exponential amplification.
+4. **Level-2 `LGBM(MAE)` Meta-Stacker & Nested Hurdle Gate:** Non-linearly combines Hurdle and Raw-Scale L1 predictions with fold-local probability gating $\mathbb{I}[P_{\text{cal}, i} \ge \theta^*]$.
 
 ---
 
-## 3. Validation Results Summary (5-Fold Stratified CV)
+## 3. Previously Reported Candidate Scores (Not Promotion-Verified)
 
-| Model Architecture | OOF MAE (THB) | OOF NMAE | Status |
-| :--- | :---: | :---: | :---: |
-| Baseline (Empirical Global Median) | 10,495.48 | 0.5000 | Reference Baseline |
-| Standalone LightGBM Hurdle | 2,879.38 | 0.7847 | Target Exceeded (+0.0347) |
-| Standalone CatBoost Hurdle | 2,862.14 | 0.7858 | Target Exceeded (+0.0358) |
-| Previous Tri-Model Hurdle | 2,809.54 | 0.7889 | Pre-Upgrade (+0.0389) |
-| **Scale-Relative Tri-Model Hurdle Ensemble** | **2,721.39** | **0.794122** | **SOTA Leader (+0.0441)** |
+| Architecture | Reported MAE (THB) | Reported OOF NMAE | Audit status |
+| :--- | :---: | :---: | :--- |
+| 1. Previous Frozen Two-Stage Hurdle Baseline | 2,796.9345 | 0.7896088679 | Superseded baseline |
+| 2. Direct Raw-Scale L1 Ensemble (LGBM + CB + XGB) | 2,851.7079 | 0.7863688920 | Component |
+| 3. Level-2 LGBM (MAE) Meta-Stacker | 2,788.4938 | 0.7901105291 | Exploratory; not nested |
+| 4. 3-Family Two-Stage Log-Multiplier Hurdle | 2,769.6809 | 0.7912309444 | Exploratory; not nested |
+| 5. Hybrid Hurdle + Raw-Scale L1 Ensemble | 2,762.9464 | 0.7916327989 | Exploratory; not nested |
+| **6. Gated Super-Hybrid + Level-2 Meta-Stacker (reported candidate)** | **2,760.4707** | **0.7917806249** | **Not promoted; protocol unverified** |
 
 ---
 
 ## 4. Execution & Artifacts
 
-- **Jupyter Notebook:** `task3_monthly_spending.ipynb` (Follows the strict 11-section format and team header).
-- **Test Set Predictions:** `predictions/test_predictions.csv` (25,889 rows with `player_id`, `spending_30d`, `p_spender`).
-- **Official Submission:** `submit/index.csv` (25,889 rows, validated with zero NaNs, valid bounds).
+Current predictions remain uncommitted candidate artifacts. Do not treat them as promoted until a true nested run, same-row champion comparison, and positive 95% paired CI are available.
+
+- **Jupyter Notebook:** `task3_monthly_spending.ipynb` (22 cells: 12 Markdown, 10 Code; AST verified).
+- **Test Set Predictions:** `predictions/test_predictions.csv` (25,889 rows aligned with `test.csv`).
+- **Official Submission:** `submit/index.csv` (25,889 rows: `ANS00001`–`ANS25889`, $48.63\%$ zeros, median $87.00$ THB, max $344{,}055.47$ THB).
+- **Report Assets:** 300-DPI diagnostic figures and `ablation_benchmark.csv` in `assets/`.
