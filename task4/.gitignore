@@ -7,8 +7,16 @@ __pycache__/
 .venv/
 
 # Dataset images are kept locally and are not committed.
+data/train
+data/test
+data/train/
+data/test/
 data/train/*.jpg
 data/test/*.jpg
+
+# Large binary embeddings cache
+predictions/*.npz
+predictions/*.npy
 
 # Downloaded pretrained-weight cache; keep the trained checkpoint instead.
 models/torch-cache/
