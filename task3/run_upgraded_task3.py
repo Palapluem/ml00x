@@ -1,7 +1,7 @@
 """
-Task 3: Promoted Champion Architecture (Nested 5-Fold OOF NMAE = 0.7917806249 | MAE = 2,760.4707 THB)
-Hybrid Two-Stage Scale-Relative Log-Multiplier Hurdle + Direct Raw-Scale L1 Stacking + Level-2 LGBM(MAE) Meta-Stacker.
-Strictly fold-local preprocessing (`estimate_prev_hist_ratio(fold_train)` and fold-local medians — zero cross-fold leakage).
+Task 3: Promoted Champion Architecture with Bayes-Optimal Conditional Quantile Hurdle
+Hybrid Two-Stage Dynamic Quantile Hurdle + Scale-Relative Log-Multiplier Hurdle + Direct Raw-Scale L1 Stacking + Level-2 LGBM(MAE) Meta-Stacker.
+Strictly fold-local preprocessing (zero cross-fold leakage).
 """
 import time
 import warnings
@@ -47,17 +47,15 @@ def engineer_features(
     df: pd.DataFrame, prev_to_hist_ratio: float, medians: pd.Series | None = None
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
     d = df.copy()
-    for c in ["player_id", "id", "spending_30d", "is_spender"]:
-        if c in d.columns:
-            d.drop(columns=[c], inplace=True)
+    drop_cols = [c for c in ["player_id", "id", "spending_30d", "is_spender"] if c in d.columns]
+    if drop_cols:
+        d = d.drop(columns=drop_cols)
 
     d["is_na_hist"] = d["historical_spending"].isna().astype(np.float32)
     d["is_na_prev"] = d["prev_month_spending"].isna().astype(np.float32)
     d["is_na_tx"] = d["total_transactions"].isna().astype(np.float32)
     d["is_na_avg_tx"] = d["avg_transaction_value"].isna().astype(np.float32)
 
-    # Empirical proxy / high-fidelity approximation (exact within 0.01 THB for 99.0% of rows):
-    # hist ≈ total_tx * avg_tx_val
     calc_hist = d["total_transactions"] * d["avg_transaction_value"]
     hist_clean = d["historical_spending"].copy()
     mask_hist = hist_clean.isna() & calc_hist.notna()
@@ -92,6 +90,30 @@ def engineer_features(
     return d, d_imputed, medians
 
 
+def interpolate_quantile_predictions(
+    p_cal: np.ndarray, quantiles: list[float], pred_q_dict: dict[float, np.ndarray], tau: float = 0.42
+) -> np.ndarray:
+    q_star = np.clip((p_cal - tau) / np.maximum(p_cal, 1e-4), quantiles[0], quantiles[-1])
+    n = len(p_cal)
+    out = np.zeros(n, dtype=np.float64)
+    q_arr = np.array(quantiles)
+    for i in range(n):
+        if p_cal[i] < tau:
+            out[i] = 0.0
+        else:
+            qs = q_star[i]
+            idx = np.searchsorted(q_arr, qs)
+            if idx == 0:
+                out[i] = pred_q_dict[q_arr[0]][i]
+            elif idx >= len(q_arr):
+                out[i] = pred_q_dict[q_arr[-1]][i]
+            else:
+                q_lo, q_hi = q_arr[idx - 1], q_arr[idx]
+                w_hi = (qs - q_lo) / (q_hi - q_lo)
+                out[i] = (1.0 - w_hi) * pred_q_dict[q_lo][i] + w_hi * pred_q_dict[q_hi][i]
+    return out
+
+
 def main():
     t0 = time.time()
     train_df = pd.read_csv(DATA_DIR / "train.csv")
@@ -116,6 +138,11 @@ def main():
     hurdle_cb_pos_test = np.zeros(n_te, dtype=np.float64)
     hurdle_xgb_pos_test = np.zeros(n_te, dtype=np.float64)
 
+    # Quantile bank
+    quantiles = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60]
+    q_oof_dict = {q: np.zeros(n, dtype=np.float64) for q in quantiles}
+    q_test_dict = {q: np.zeros(n_te, dtype=np.float64) for q in quantiles}
+
     raw_lgb_oof = np.zeros(n, dtype=np.float64)
     raw_cb_oof = np.zeros(n, dtype=np.float64)
     raw_xgb_oof = np.zeros(n, dtype=np.float64)
@@ -129,7 +156,7 @@ def main():
     anchor_prev_test = np.zeros(n_te, dtype=np.float64)
     anchor_hist_test = np.zeros(n_te, dtype=np.float64)
 
-    print("=== Training Task 3 Hybrid Two-Stage Hurdle + Raw-Scale L1 Ensemble (5 Folds) ===")
+    print("=== Training Task 3 Bayes-Optimal Quantile Hurdle + Multi-Model Stacking (5 Folds) ===")
     for fold, (tr_idx, va_idx) in enumerate(skf.split(train_df, strat_key), 1):
         ft0 = time.time()
         f_tr_df = train_df.iloc[tr_idx].reset_index(drop=True)
@@ -182,7 +209,7 @@ def main():
         p_oof[va_idx] = 0.45 * p_lgb_va + 0.35 * p_cb_va + 0.20 * p_xgb_va
         p_test += (0.45 * p_lgb_te + 0.35 * p_cb_te + 0.20 * p_xgb_te) / 5.0
 
-        # 2. Stage 2 Positive Log-Multiplier Hurdle Regressors
+        # 2. Stage 2 Positive Regressors (Log-multiplier Hurdle)
         pos_mask = y_tr > 0
         z_tr = np.log1p(y_tr[pos_mask] / anchor_tr[pos_mask])
 
@@ -213,7 +240,18 @@ def main():
         hurdle_xgb_pos_oof[va_idx] = np.clip(anchor_va * np.expm1(np.clip(reg_hurdle_xgb.predict(X_va_raw), 0, 10)), 0, None)
         hurdle_xgb_pos_test += np.clip(anchor_te * np.expm1(np.clip(reg_hurdle_xgb.predict(X_te_raw), 0, 10)), 0, None) / 5.0
 
-        # 3. Direct Raw-Scale L1 Regressors
+        # 3. Multi-Quantile Bank (LightGBM Quantile Objectives)
+        for q in quantiles:
+            reg_q = lgb.LGBMRegressor(
+                objective="quantile", alpha=q, n_estimators=750, learning_rate=0.03,
+                num_leaves=45, min_child_samples=30, subsample=0.8, colsample_bytree=0.8,
+                random_state=42 + fold, n_jobs=-1, verbose=-1
+            )
+            reg_q.fit(X_tr_raw.iloc[pos_mask], z_tr)
+            q_oof_dict[q][va_idx] = np.clip(anchor_va * np.expm1(np.clip(reg_q.predict(X_va_raw), 0, 10)), 0, None)
+            q_test_dict[q] += np.clip(anchor_te * np.expm1(np.clip(reg_q.predict(X_te_raw), 0, 10)), 0, None) / 5.0
+
+        # 4. Direct Raw-Scale L1 Regressors
         reg_raw_lgb = lgb.LGBMRegressor(
             objective="mae", n_estimators=1000, learning_rate=0.03,
             num_leaves=127, max_depth=10, min_child_samples=25,
@@ -250,8 +288,12 @@ def main():
     raw_ens_oof = 0.45 * raw_lgb_oof + 0.30 * raw_cb_oof + 0.25 * raw_xgb_oof
     raw_ens_test = 0.45 * raw_lgb_test + 0.30 * raw_cb_test + 0.25 * raw_xgb_test
 
+    # Isotonic Probability Calibration & Bayes-Optimal Dynamic Quantile Prediction
     p_cal_oof = np.zeros(n, dtype=np.float64)
     p_cal_test = np.zeros(n_te, dtype=np.float64)
+    bayes_quant_oof = np.zeros(n, dtype=np.float64)
+    bayes_quant_test = np.zeros(n_te, dtype=np.float64)
+
     hurdle_3fam_oof = np.zeros(n, dtype=np.float64)
     hurdle_3fam_test = np.zeros(n_te, dtype=np.float64)
     hybrid_oof = np.zeros(n, dtype=np.float64)
@@ -268,6 +310,13 @@ def main():
         p_cal_oof[va_idx] = p_c_va
         p_cal_test += p_c_te / 5.0
 
+        # Bayes-Optimal Quantile Hurdle per fold
+        va_q_dict = {q: q_oof_dict[q][va_idx] for q in quantiles}
+        te_q_dict = {q: q_test_dict[q] for q in quantiles}
+        bayes_quant_oof[va_idx] = interpolate_quantile_predictions(p_c_va, quantiles, va_q_dict, tau=0.42)
+        bayes_quant_test += interpolate_quantile_predictions(p_c_te, quantiles, te_q_dict, tau=0.42) / 5.0
+
+        # Standard Hurdle
         best_th, best_s = 0.35, -1.0
         for th in np.linspace(0.22, 0.48, 53):
             s = compute_nmae(y[tr_idx], hurdle_pos_oof[tr_idx] * (p_c_tr >= th))
@@ -276,39 +325,51 @@ def main():
         hurdle_3fam_oof[va_idx] = hurdle_pos_oof[va_idx] * (p_c_va >= best_th)
         hurdle_3fam_test += (hurdle_pos_test * (p_c_te >= best_th)) / 5.0
 
-        best_w, best_th_h, best_sh = 0.75, best_th, -1.0
-        for w in np.linspace(0.40, 1.00, 25):
-            mix_tr = w * hurdle_pos_oof[tr_idx] + (1.0 - w) * raw_ens_oof[tr_idx]
-            for th2 in np.linspace(0.24, 0.44, 21):
-                s = compute_nmae(y[tr_idx], mix_tr * (p_c_tr >= th2))
-                if s > best_sh:
-                    best_sh, best_w, best_th_h = s, w, th2
+        # Hybrid blend of Hurdle, Bayes-Quantile, and Raw-Scale L1
+        best_w1, best_w2, best_th_h, best_sh = 0.50, 0.30, best_th, -1.0
+        for w1 in [0.40, 0.50, 0.60]:
+            for w2 in [0.20, 0.30, 0.40]:
+                w3 = round(1.0 - w1 - w2, 4)
+                if w3 < 0:
+                    continue
+                tr_q_dict = {q: q_oof_dict[q][tr_idx] for q in quantiles}
+                tr_bq = interpolate_quantile_predictions(p_c_tr, quantiles, tr_q_dict, tau=0.42)
+                mix_tr = w1 * hurdle_pos_oof[tr_idx] * (p_c_tr >= best_th) + w2 * tr_bq + w3 * raw_ens_oof[tr_idx]
+                for th2 in np.linspace(0.26, 0.44, 19):
+                    s = compute_nmae(y[tr_idx], mix_tr * (p_c_tr >= th2))
+                    if s > best_sh:
+                        best_sh, best_w1, best_w2, best_th_h = s, w1, w2, th2
 
-        mix_va = best_w * hurdle_pos_oof[va_idx] + (1.0 - best_w) * raw_ens_oof[va_idx]
+        w3_best = round(1.0 - best_w1 - best_w2, 4)
+        mix_va = best_w1 * hurdle_3fam_oof[va_idx] + best_w2 * bayes_quant_oof[va_idx] + w3_best * raw_ens_oof[va_idx]
         hybrid_oof[va_idx] = mix_va * (p_c_va >= best_th_h)
-        mix_te = best_w * hurdle_pos_test + (1.0 - best_w) * raw_ens_test
+        mix_te = best_w1 * hurdle_3fam_test + best_w2 * bayes_quant_test + w3_best * raw_ens_test
         hybrid_test += (mix_te * (p_c_te >= best_th_h)) / 5.0
 
+        # Meta-Stacker features
         m_tr = np.column_stack([
             hurdle_pos_oof[tr_idx] * (p_c_tr >= best_th),
             hurdle_pos_oof[tr_idx], p_c_tr,
+            q_oof_dict[0.30][tr_idx], q_oof_dict[0.50][tr_idx],
             raw_lgb_oof[tr_idx], raw_cb_oof[tr_idx], raw_xgb_oof[tr_idx],
             anchor_prev_oof[tr_idx], anchor_hist_oof[tr_idx],
         ])
         m_va = np.column_stack([
             hurdle_3fam_oof[va_idx],
             hurdle_pos_oof[va_idx], p_c_va,
+            q_oof_dict[0.30][va_idx], q_oof_dict[0.50][va_idx],
             raw_lgb_oof[va_idx], raw_cb_oof[va_idx], raw_xgb_oof[va_idx],
             anchor_prev_oof[va_idx], anchor_hist_oof[va_idx],
         ])
         m_te = np.column_stack([
             hurdle_pos_test * (p_c_te >= best_th),
             hurdle_pos_test, p_c_te,
+            q_test_dict[0.30], q_test_dict[0.50],
             raw_lgb_test, raw_cb_test, raw_xgb_test,
             anchor_prev_test, anchor_hist_test,
         ])
         meta_reg = lgb.LGBMRegressor(
-            objective="mae", n_estimators=400, learning_rate=0.02,
+            objective="mae", n_estimators=450, learning_rate=0.02,
             num_leaves=31, max_depth=5, min_child_samples=50,
             subsample=0.8, colsample_bytree=0.8, reg_alpha=1.0, reg_lambda=5.0,
             random_state=100 + fold, n_jobs=-1, verbose=-1
@@ -317,13 +378,13 @@ def main():
         meta_oof[va_idx] = np.clip(meta_reg.predict(m_va), 0, None)
         meta_test += np.clip(meta_reg.predict(m_te), 0, None) / 5.0
 
-    super_oof = 0.70 * hybrid_oof + 0.30 * meta_oof
-    super_test = 0.70 * hybrid_test + 0.30 * meta_test
+    super_oof = 0.65 * hybrid_oof + 0.35 * meta_oof
+    super_test = 0.65 * hybrid_test + 0.35 * meta_test
 
     gated_oof = np.zeros_like(y)
     gated_test = np.zeros_like(super_test)
     for fold, (tr_idx, va_idx) in enumerate(skf.split(train_df, strat_key), 1):
-        best_th, best_s = 0.43, -1.0
+        best_th, best_s = 0.42, -1.0
         for th in np.linspace(0.35, 0.46, 23):
             s = compute_nmae(y[tr_idx], super_oof[tr_idx] * (p_cal_oof[tr_idx] >= th))
             if s > best_s:
@@ -331,7 +392,10 @@ def main():
         gated_oof[va_idx] = super_oof[va_idx] * (p_cal_oof[va_idx] >= best_th)
         gated_test += (super_test * (p_cal_test >= best_th)) / 5.0
 
-    print(f"Champion Nested OOF NMAE: {compute_nmae(y, gated_oof):.10f} | MAE: {mean_absolute_error(y, gated_oof):.4f} THB")
+    nmae_score = compute_nmae(y, gated_oof)
+    mae_score = mean_absolute_error(y, gated_oof)
+    print(f"=== SOTA Nested OOF NMAE: {nmae_score:.10f} | MAE: {mae_score:.4f} THB ===")
+    
     best_test_clean = np.round(np.clip(gated_test, 0.0, None), 2)
     ans_ids = [f"ANS{i:05d}" for i in range(1, len(test_df) + 1)]
 
@@ -344,10 +408,11 @@ def main():
         "p_spender": np.round(p_test, 6),
         "p_calibrated": np.round(p_cal_test, 6),
         "pred_positive_median": np.round(hurdle_pos_test, 2),
+        "pred_bayes_quantile": np.round(bayes_quant_test, 2),
         "pred_raw_l1_ensemble": np.round(raw_ens_test, 2),
         "pred_hybrid_hurdle": best_test_clean,
     }).to_csv(PRED_DIR / "test_predictions.csv", index=False)
-    print(f"Saved promoted predictions in {time.time() - t0:.1f}s")
+    print(f"Saved elevated predictions to {SUBMIT_DIR / 'index.csv'} in {time.time() - t0:.1f}s")
 
 
 if __name__ == "__main__":
