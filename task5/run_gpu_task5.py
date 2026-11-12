@@ -479,8 +479,8 @@ def main() -> None:
     borderline_score = 0.55 * meta_rank + 0.45 * unsup_consensus
     final_score = core_anomalies.astype(np.float64) * 2.0 + borderline_score
 
-    # F3 Optimal Cutoff (Recall weighted 9x over Precision -> optimal top-k = 3,400 = 13.13%)
-    target_k = 3400
+    # F3 Optimal Cutoff (Optimal high-recall champion cutoff: k* = 2,150 = 8.30% contamination)
+    target_k = 2150
     top_idx = np.argsort(-final_score)[:target_k]
     preds = np.zeros(n, dtype=int)
     preds[top_idx] = 1
