@@ -6,7 +6,6 @@ __pycache__/
 # uv virtual environment
 .venv/
 
+# Competition data
+/data/test.csv
 
-# Dataset files
-data/
-data/*

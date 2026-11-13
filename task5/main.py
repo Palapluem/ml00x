@@ -1,247 +1,317 @@
-"""Task 5: Account Security Monitoring (Unsupervised Anomaly Detection).
+"""Task 5: unsupervised account anomaly detection.
 
-Optimized for the F3 metric (Recall is weighted 9x higher than Precision; beta = 3.0).
-Combines multiple complementary unsupervised anomaly detection paradigms:
-1. Isolation Forest (Subspace Tree Partitioning)
-2. Latent Subspace Mahalanobis Distance (Hotelling's T^2 via PCA)
-3. Residual Subspace Reconstruction Error (MAE / SPE via PCA Inverse Transform)
-4. Robust Elliptic Envelope (Mahalanobis Distance on Core Manifold)
-5. Domain Spatio-Temporal Risk Engine (Impossible Travel & ATO Tripwires)
+Design idea ("each player has their own rectangle"):
+    The user's lat/lon plot showed that every player's four logins sit in a small
+    box around one home point, and players that leave their box are suspicious.
+    We generalise that to every behaviour group:
 
-Outputs:
-- submit/index.csv (Columns: id, task5; binary flags 0/1)
-- predictions/test_predictions.csv (Detailed scores and flags)
-- assets/task5_anomaly_detection_diagnostics.png (Diagnostic visualization)
+    1. Personal baseline: periods 1-3 define what is normal for *this* player.
+       Period 4 is compared against it (drift features, robust-scaled by the
+       population's typical period-to-period noise).
+    2. Population baseline: each player's 4-period average is compared against
+       everyone else (level features), which catches always-abnormal accounts
+       such as bots that never change.
+    3. Geography: displacement of each login from the player's home point, plus
+       coordinates outside the valid lat/lon box.
+
+    Detectors on the engineered matrix:
+      - HDBSCAN-CBLOF (primary): density clustering (HDBSCAN) per feature, then
+        cluster-based outlier scoring: players in a small cluster (<5%) that an
+        empty band separates from the large clusters are outliers. This is the
+        "rectangle" test learned by a model. Full-space models (Isolation
+        Forest, MCD, GMM, autoencoder, LOF) miss the bot, silent, low-activity
+        and unstable clusters because each differs in only one or a few of ~75
+        features; see assets/model-comparison.csv.
+      - Robust tail score: soft-max of |robust z| over features.
+      - Isolation Forest on the clipped robust-z matrix (multi-feature combos).
+      - Gap box: a simpler sorted-gap version of the HDBSCAN test, kept only as
+        an independent cross-check (not in the vote).
+    Hard vote: anomalous if HDBSCAN-CBLOF flags the player OR the tail score
+    passes its natural break. F3 weights recall 9x, so a union suits it.
+
+Test rows are only used without labels (allowed for Task 5).
 """
 
-from __future__ import annotations
-
-import os
+import warnings
 from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.stats import rankdata
-from sklearn.covariance import EllipticEnvelope
-from sklearn.decomposition import PCA
+from sklearn.cluster import HDBSCAN
 from sklearn.ensemble import IsolationForest
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import RobustScaler
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 
-ROOT = Path(__file__).resolve().parent
-DATA_PATH = ROOT / "data/test.csv"
-SUBMIT_PATH = ROOT / "submit/index.csv"
-PRED_PATH = ROOT / "predictions/test_predictions.csv"
-ASSETS_DIR = ROOT / "assets"
 SEED = 42
-TARGET_CONTAMINATION = 0.08304685  # ~2,150 accounts out of 25,889
+PERIODS = (1, 2, 3, 4)
+ROOT = Path(__file__).parent
+ASSETS = ROOT / "assets"
+STATIC = ["account_age_days", "behavior_stability"]
+FLAGS = ["password_changed", "vpn_usage", "suspicious_login_time", "mass_item_sale"]
+# Count-like groups have a natural long right tail; their level z is less trustworthy.
+DISCRETE = {"device_count", "refund_count", "guild_changes"}
 
 
-def haversine_distance(lat1: pd.Series, lon1: pd.Series, lat2: pd.Series, lon2: pd.Series) -> np.ndarray:
-    """Compute great-circle distance in kilometers using the Haversine formula."""
-    r = 6371.0  # Earth's mean radius in km
-    phi1, phi2 = np.radians(lat1), np.radians(lat2)
-    dphi = np.radians(lat2 - lat1)
-    dlam = np.radians(lon2 - lon1)
-    a = np.sin(dphi / 2.0) ** 2 + np.cos(phi1) * np.cos(phi2) * np.sin(dlam / 2.0) ** 2
-    return 2.0 * r * np.arctan2(np.sqrt(np.clip(a, 0.0, 1.0)), np.sqrt(np.clip(1.0 - a, 0.0, 1.0)))
+def period_groups(df: pd.DataFrame) -> list[str]:
+    return sorted({c.rsplit("_", 1)[0] for c in df.columns if c[-2:] in {f"_{p}" for p in PERIODS}})
 
 
-def engineer_security_features(df: pd.DataFrame) -> tuple[pd.DataFrame, np.ndarray]:
-    """Engineer spatio-temporal drift features and domain risk indicators."""
-    x = df.copy()
-    
-    # 1. Geographic displacement & impossible travel velocity
-    dist_1_2 = haversine_distance(x['login_lat_1'], x['login_lon_1'], x['login_lat_2'], x['login_lon_2'])
-    dist_2_3 = haversine_distance(x['login_lat_2'], x['login_lon_2'], x['login_lat_3'], x['login_lon_3'])
-    dist_3_4 = haversine_distance(x['login_lat_3'], x['login_lon_3'], x['login_lat_4'], x['login_lon_4'])
-    
-    x['geo_dist_1_2'] = dist_1_2
-    x['geo_dist_2_3'] = dist_2_3
-    x['geo_dist_3_4'] = dist_3_4
-    x['max_geo_dist'] = np.nanmax(np.column_stack([dist_1_2, dist_2_3, dist_3_4]), axis=1)
-    x['recent_geo_jump'] = dist_3_4
-    
-    # 2. Temporal shifts between baseline periods (1..3) and latest period (4)
-    x['login_drift_4_vs_123'] = np.abs(x['login_count_4'] - x[['login_count_1', 'login_count_2', 'login_count_3']].mean(axis=1))
-    x['device_spike_4'] = x['device_count_4'] - x[['device_count_1', 'device_count_2', 'device_count_3']].max(axis=1)
-    x['location_surge_4'] = x['location_changes_4'] - x[['location_changes_1', 'location_changes_2', 'location_changes_3']].mean(axis=1)
-    x['entropy_surge_4'] = x['ip_hash_entropy_4'] - x[['ip_hash_entropy_1', 'ip_hash_entropy_2', 'ip_hash_entropy_3']].mean(axis=1)
-    x['session_drift_4'] = np.abs(x['session_duration_mean_4'] - x[['session_duration_mean_1', 'session_duration_mean_2', 'session_duration_mean_3']].mean(axis=1))
-    
-    # In-game behavior shift (botting / sudden performance alteration)
-    x['accuracy_shift_4'] = np.abs(x['accuracy_mean_4'] - x[['accuracy_mean_1', 'accuracy_mean_2', 'accuracy_mean_3']].mean(axis=1))
-    x['reaction_time_shift_4'] = np.abs(x['reaction_time_mean_4'] - x[['reaction_time_mean_1', 'reaction_time_mean_2', 'reaction_time_mean_3']].mean(axis=1))
-    x['kda_shift_4'] = np.abs(x['kda_mean_4'] - x[['kda_mean_1', 'kda_mean_2', 'kda_mean_3']].mean(axis=1))
-    
-    # Financial & Social Disruption (ATO liquidation patterns)
-    x['currency_transfer_spike_4'] = x['currency_transfers_4'] - x[['currency_transfers_1', 'currency_transfers_2', 'currency_transfers_3']].mean(axis=1)
-    x['friend_removes_spike_4'] = x['friend_removes_4'] - x[['friend_removes_1', 'friend_removes_2', 'friend_removes_3']].mean(axis=1)
-    
-    # 3. Explicit High-Risk Tripwires
-    sec_flags = ['password_changed', 'vpn_usage', 'suspicious_login_time', 'mass_item_sale']
-    x['sec_flag_sum'] = x[sec_flags].fillna(0).sum(axis=1)
-    x['compound_risk'] = ((x['password_changed'] == 1) & (x['vpn_usage'] == 1)).astype(float)
-    x['liquidation_risk'] = ((x['mass_item_sale'] == 1) & (x['password_changed'] == 1)).astype(float)
-    x['impossible_travel_flag'] = (dist_3_4 > 500.0).astype(float)
-    
-    # Domain Risk Score (Weighted heuristic calibration)
-    domain_score = (
-        2.5 * x['sec_flag_sum']
-        + 3.0 * x['compound_risk']
-        + 4.0 * x['liquidation_risk']
-        + 2.0 * x['impossible_travel_flag']
-        + 1.5 * (x['device_spike_4'] > 1.0).astype(float)
-        + 1.5 * (x['entropy_surge_4'] > 1.0).astype(float)
-        + 1.0 * (x['currency_transfer_spike_4'] > 2.0).astype(float)
-    ).to_numpy()
-    
-    drop_cols = ['id', 'player_id']
-    feature_cols = [c for c in x.columns if c not in drop_cols]
-    return x[feature_cols], domain_score
+def robust_z(x: pd.Series) -> pd.Series:
+    med = x.median()
+    mad = (x - med).abs().median() * 1.4826
+    if not np.isfinite(mad) or mad < 1e-9:
+        mad = x.std() or 1.0
+    return (x - med) / mad
+
+
+def engineer(df: pd.DataFrame) -> pd.DataFrame:
+    feats: dict[str, pd.Series] = {}
+    for g in period_groups(df):
+        if g in {"login_lat", "login_lon"}:
+            continue
+        X = df[[f"{g}_{p}" for p in PERIODS]]
+        base = X.iloc[:, :3].median(axis=1)
+        feats[f"{g}__level"] = X.mean(axis=1)
+        # Personal drift: period 4 vs own baseline. Missing -> no evidence (0).
+        feats[f"{g}__drift4"] = (X.iloc[:, 3] - base).fillna(0.0)
+        feats[f"{g}__spread"] = X.std(axis=1)
+
+    lat = df[[f"login_lat_{p}" for p in PERIODS]].to_numpy()
+    lon = df[[f"login_lon_{p}" for p in PERIODS]].to_numpy()
+    with warnings.catch_warnings():  # players with all-NaN coordinates
+        warnings.simplefilter("ignore", RuntimeWarning)
+        home_lat, home_lon = np.nanmedian(lat[:, :3], 1), np.nanmedian(lon[:, :3], 1)
+    disp = np.hypot(lat - home_lat[:, None], lon - home_lon[:, None])
+    feats["geo__disp4"] = pd.Series(np.nan_to_num(disp[:, 3], nan=0.0))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        feats["geo__disp_max"] = pd.Series(np.nan_to_num(np.nanmax(disp, 1), nan=0.0))
+    outside = (np.abs(lat) > 90) | (np.abs(lon) > 180)
+    feats["geo__outside"] = pd.Series(outside.sum(1).astype(float))
+
+    for c in STATIC:
+        feats[c] = df[c]
+    F = pd.DataFrame(feats)
+    return F.fillna(F.median())
+
+
+def score(F: pd.DataFrame):
+    Z = F.apply(robust_z)
+    for c in Z:
+        if c.split("__")[0] in DISCRETE:
+            Z[c] = Z[c] * 0.5  # damp coarse integer features
+    Zc = Z.clip(-30, 30)
+
+    # Detector 1: soft-max of absolute robust z (smooth "any feature out of its box").
+    A = Zc.abs().to_numpy()
+    tail = np.log(np.exp(A / 3).sum(1)) * 3
+
+    # Detector 2: Isolation Forest on the robust-z matrix.
+    iso = IsolationForest(n_estimators=600, max_samples=1024, random_state=SEED, n_jobs=-1)
+    iso.fit(Zc)
+    iforest = -iso.score_samples(Zc)
+
+    boxes = gap_boxes(F)
+    box_out = pd.DataFrame({c: (F[c] < lo) | (F[c] > hi) for c, (lo, hi) in boxes.items()})
+    pd.DataFrame([{"feature": c, "low": lo, "high": hi, "players_outside": int(box_out[c].sum())}
+                  for c, (lo, hi) in boxes.items()]).to_csv(ASSETS / "gap-boxes.csv", index=False)
+
+    outside, clusters = hdbscan_cblof(F)
+    clusters.sort_values("separation", ascending=False).to_csv(ASSETS / "hdbscan-clusters.csv", index=False)
+
+    out = pd.DataFrame({"tail": tail, "iforest": iforest,
+                        "hdbscan_hits": outside.sum(axis=1).to_numpy(),
+                        "box_hits": box_out.sum(axis=1).to_numpy()})
+    ranks = out[["tail", "iforest"]].rank(pct=True)
+    out["ensemble"] = ranks.mean(axis=1)  # soft vote on ranks
+    return out, outside, boxes
+
+
+def hdbscan_cblof(F: pd.DataFrame, small_frac=0.05, min_sep=100.0, eps=0.1, min_unique=200):
+    """Per-feature HDBSCAN + cluster-based outlier factor.
+
+    For each feature (scaled by IQR), HDBSCAN finds density clusters;
+    `cluster_selection_epsilon` merges fragments of the same dense core. A
+    cluster smaller than `small_frac` of players is an outlier cluster when the
+    empty band between it and the nearest large cluster is at least `min_sep`
+    times the core's typical spacing near that edge. Measured on this data, real
+    clusters sit at >=125x and tail fragments at <=63x, so 100 falls in that gap.
+    Returns per-feature membership flags and a per-cluster table.
+    """
+    hits, table = {}, []
+    for c in F:
+        v = F[c].to_numpy()
+        if len(np.unique(v)) < min_unique:
+            continue
+        x = (v - np.median(v)) / (np.subtract(*np.percentile(v, [75, 25])) + 1e-9)
+        lab = HDBSCAN(min_cluster_size=50, min_samples=20, cluster_selection_epsilon=eps,
+                      copy=True).fit_predict(x.reshape(-1, 1))
+        sizes = pd.Series(lab[lab >= 0]).value_counts()
+        big = sizes[sizes >= small_frac * len(x)].index
+        core = np.sort(x[np.isin(lab, big)])
+        if len(core) == 0:
+            continue
+        flag = np.zeros(len(x), bool)
+        for sc in sizes[sizes < small_frac * len(x)].index:
+            m = lab == sc
+            members = x[m]
+            if len(np.unique(members)) < 0.5 * m.sum():
+                continue  # point mass (e.g. never adds friends): legit sub-population
+            low_side = members.mean() < np.median(core)
+            gap = core[0] - members.max() if low_side else members.min() - core[-1]
+            edge = core[:200] if low_side else core[-200:]
+            spacing = np.median(np.diff(edge)) + 1e-12
+            sep = gap / spacing
+            table.append({"feature": c, "cluster_size": int(m.sum()), "gap_iqr": round(float(gap), 4),
+                          "separation": round(float(sep), 1), "outlier_cluster": bool(sep >= min_sep)})
+            if sep >= min_sep:
+                flag |= m
+        if flag.any():
+            hits[c] = flag
+    return pd.DataFrame(hits, index=F.index), pd.DataFrame(table)
+
+
+def gap_boxes(F: pd.DataFrame, tail_frac=0.06, min_ratio=300.0, min_group=20, min_unique=200):
+    """Learn a [low, high] box per feature from density gaps in its outer tails.
+
+    A tail edge is used only when the widest spacing in that tail is
+    `min_ratio` times larger than the typical spacing there, i.e. a real empty
+    band, and at least `min_group` players sit beyond it.
+    """
+    boxes = {}
+    for c in F:
+        v = np.sort(F[c].to_numpy())
+        if len(np.unique(v)) < min_unique:
+            continue  # integer-like features always have gaps
+        n, k = len(v), int(len(v) * tail_frac)
+        lo, hi = -np.inf, np.inf
+        for side, seg in (("lo", v[: k + 1]), ("hi", v[n - k - 1 :])):
+            d = np.diff(seg)
+            typical = np.median(d[d > 0]) if (d > 0).any() else 0.0
+            if typical <= 0:
+                continue
+            i = int(np.argmax(d))
+            beyond = i + 1 if side == "lo" else len(seg) - 1 - i
+            group = seg[: i + 1] if side == "lo" else seg[i + 1 :]
+            # A point mass (e.g. players who never add friends) is a legit
+            # sub-population, not a separated anomaly cluster.
+            point_mass = len(np.unique(group)) < 0.5 * len(group)
+            if d[i] / typical >= min_ratio and beyond >= min_group and not point_mass:
+                edge = (seg[i] + seg[i + 1]) / 2
+                lo, hi = (edge, hi) if side == "lo" else (lo, edge)
+        if np.isfinite(lo) or np.isfinite(hi):
+            boxes[c] = (lo, hi)
+    return boxes
+
+
+def natural_break(s: np.ndarray, lo_q=0.85, hi_q=0.995) -> float:
+    """Threshold at the widest gap in the upper tail (sorted score spacing)."""
+    v = np.sort(s)
+    lo, hi = int(len(v) * lo_q), int(len(v) * hi_q)
+    seg = v[lo:hi]
+    # Smooth spacing so a single pair doesn't dominate.
+    gaps = np.convolve(np.diff(seg), np.ones(5) / 5, mode="same")
+    i = int(np.argmax(gaps))
+    return float(seg[i])
 
 
 def main() -> None:
-    print(f"Loading Task 5 test dataset from {DATA_PATH}...")
-    test_df = pd.read_csv(DATA_PATH)
-    total_records = len(test_df)
-    print(f"Total test instances: {total_records:,}")
-    
-    print("Engineering spatio-temporal and security risk features...")
-    fe_features, domain_scores = engineer_security_features(test_df)
-    
-    # Impute missing values with median
-    imputer = SimpleImputer(strategy='median')
-    X_imputed = imputer.fit_transform(fe_features)
-    
-    # Robust scaling for distance-based and linear manifold methods
-    scaler = RobustScaler()
-    X_scaled = scaler.fit_transform(X_imputed)
-    
-    print("Fitting Model 1: Isolation Forest (300 estimators)...")
-    iso = IsolationForest(
-        n_estimators=300,
-        contamination=TARGET_CONTAMINATION,
-        random_state=SEED,
-        n_jobs=-1,
-    )
-    iso.fit(X_scaled)
-    # Score is negative average path length; higher score means more anomalous
-    scores_if = -iso.score_samples(X_scaled)
-    
-    print("Fitting Model 2 & 3: PCA Latent Mahalanobis (T^2) & Reconstruction MAE (SPE)...")
-    # Retain 20 principal components (dominant low-dimensional operating manifold)
-    n_pcs = 20
-    pca = PCA(n_components=n_pcs, random_state=SEED)
-    Z_scores = pca.fit_transform(X_scaled)
-    
-    # Model 2: Hotelling's T^2 (Latent Mahalanobis Distance on PC scores)
-    mu_z = np.mean(Z_scores, axis=0)
-    cov_z = np.cov(Z_scores, rowvar=False)
-    diff_z = Z_scores - mu_z
-    inv_cov_z = np.linalg.pinv(cov_z)
-    scores_t2 = np.sum(diff_z @ inv_cov_z * diff_z, axis=1)
-    
-    # Model 3: Reconstruction Error (Residual Subspace MAE)
-    X_reconstructed = pca.inverse_transform(Z_scores)
-    scores_mae = np.mean(np.abs(X_scaled - X_reconstructed), axis=1)
-    
-    print("Fitting Model 4: Robust Elliptic Envelope on Leading PCs...")
-    ee = EllipticEnvelope(contamination=TARGET_CONTAMINATION, random_state=SEED)
-    ee.fit(Z_scores[:, :8])
-    scores_ee = -ee.score_samples(Z_scores[:, :8])
-    
-    print("Computing Multi-Paradigm Percentile Ranks...")
-    # Convert each detector's raw scores into standard uniform empirical percentiles [0, 1]
-    rank_if = rankdata(scores_if) / total_records
-    rank_t2 = rankdata(scores_t2) / total_records
-    rank_mae = rankdata(scores_mae) / total_records
-    rank_ee = rankdata(scores_ee) / total_records
-    rank_domain = rankdata(domain_scores) / total_records
-    
-    # Multi-Paradigm Ensemble Blend
-    ensemble_score = (
-        0.25 * rank_if
-        + 0.25 * rank_t2
-        + 0.20 * rank_mae
-        + 0.15 * rank_ee
-        + 0.15 * rank_domain
-    )
-    
-    # F3 Cutoff Calibration:
-    # F3 heavily penalizes missed anomalies (False Negatives).
-    # Selecting the top ~8.30% (2,150 accounts) maximizes expected F3 on real-world ATO distributions.
-    target_k = int(round(TARGET_CONTAMINATION * total_records))  # 2,150
-    cutoff_threshold = np.partition(ensemble_score, -target_k)[-target_k]
-    anomaly_flags = (ensemble_score >= cutoff_threshold).astype(int)
-    flagged_count = int(anomaly_flags.sum())
-    
-    print(f"\n=== Task 5 Anomaly Detection Calibration Results ===")
-    print(f"Target Contamination Rate: {TARGET_CONTAMINATION*100:.2f}%")
-    print(f"Optimal Anomaly Cutoff   : {cutoff_threshold:.5f}")
-    print(f"Total Accounts Flagged   : {flagged_count:,} / {total_records:,} ({flagged_count/total_records*100:.2f}%)")
-    
-    # Build and save test predictions
-    SUBMIT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    PRED_PATH.parent.mkdir(parents=True, exist_ok=True)
-    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # 1. submit/index.csv (Columns: id, task5)
-    submit_df = pd.DataFrame({
-        'id': test_df['id'] if 'id' in test_df.columns else [f"ANS{i+1:05d}" for i in range(total_records)],
-        'task5': anomaly_flags
-    })
-    submit_df.to_csv(SUBMIT_PATH, index=False)
-    print(f"Saved submission to {SUBMIT_PATH} ({len(submit_df):,} rows)")
-    
-    # 2. predictions/test_predictions.csv
-    pred_df = pd.DataFrame({
-        'id': submit_df['id'],
-        'player_id': test_df['player_id'],
-        'ensemble_anomaly_score': ensemble_score.round(5),
-        'rank_isolation_forest': rank_if.round(5),
-        'rank_latent_t2': rank_t2.round(5),
-        'rank_reconstruction_mae': rank_mae.round(5),
-        'rank_elliptic_envelope': rank_ee.round(5),
-        'rank_domain_engine': rank_domain.round(5),
-        'is_anomaly': anomaly_flags
-    })
-    pred_df.to_csv(PRED_PATH, index=False)
-    print(f"Saved detailed predictions to {PRED_PATH}")
-    
-    # 3. Generate diagnostic visual asset
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
-    
-    # Subplot 1: Distribution of Ensemble Anomaly Scores
-    axes[0].hist(ensemble_score, bins=60, color='#3B82F6', alpha=0.7, edgecolor='black', linewidth=0.5)
-    axes[0].axvline(cutoff_threshold, color='#DC2626', linestyle='--', lw=2.0, label=f'F3 Cutoff ({flagged_count:,} flagged)')
-    axes[0].set_title('Task 5: Multi-Paradigm Ensemble Anomaly Score Distribution', fontweight='bold')
-    axes[0].set_xlabel('Blended Anomaly Percentile Score')
-    axes[0].set_ylabel('Number of Accounts')
-    axes[0].legend(frameon=True)
-    axes[0].grid(True, linestyle=':', alpha=0.5)
-    
-    # Subplot 2: Leading PCA Manifold Separation
-    scatter = axes[1].scatter(
-        Z_scores[:, 0], Z_scores[:, 1],
-        c=anomaly_flags,
-        cmap='coolwarm',
-        s=12,
-        alpha=0.6
-    )
-    axes[1].set_title('Task 5: Latent PCA Space Anomaly Separation (k=20)', fontweight='bold')
-    axes[1].set_xlabel('Principal Component 1')
-    axes[1].set_ylabel('Principal Component 2')
-    axes[1].grid(True, linestyle=':', alpha=0.5)
-    
-    plot_path = ASSETS_DIR / "task5_anomaly_detection_diagnostics.png"
-    plt.tight_layout()
-    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-    plt.close()
-    print(f"Saved diagnostic asset to {plot_path}")
-    print("Task 5 unsupervised anomaly detection pipeline completed successfully!")
+    df = pd.read_csv(ROOT / "data" / "test.csv")
+    F = engineer(df)
+    S, outside, boxes = score(F)
+
+    thr = natural_break(S["tail"].to_numpy())
+    by_tail, by_hdb, by_box = S["tail"] > thr, S["hdbscan_hits"] > 0, S["box_hits"] > 0
+    pred = (by_tail | by_hdb).astype(int)
+    print(f"hdbscan: {by_hdb.sum()}  tail>{thr:.2f}: {by_tail.sum()}  both: {(by_tail & by_hdb).sum()}")
+    print(f"cross-check gap box: {by_box.sum()} flagged, {(by_box & by_hdb).sum()} shared with hdbscan")
+    print(f"flagged={pred.sum()} ({pred.mean():.2%})")
+
+    pd.DataFrame({"player_id": df.player_id, **S, "is_anomaly": pred}).to_csv(
+        ROOT / "predictions" / "detector-scores.csv", index=False)
+
+    ids = pd.read_csv(ROOT.parent / "submission" / "sample_submission.csv", usecols=["id"])["id"]
+    assert len(ids) == len(df), "row count mismatch with sample submission"
+    (ROOT / "submit").mkdir(exist_ok=True)
+    pd.DataFrame({"id": ids, "task5": pred.to_numpy()}).to_csv(ROOT / "submit" / "index.csv", index=False)
+
+    plot_scores(S, thr)
+    explain(df, F, outside, boxes, pred)
+
+
+def plot_scores(S: pd.DataFrame, thr: float) -> None:
+    ASSETS.mkdir(exist_ok=True)
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    axes[0].hist(S["tail"], bins=200, color="#245a9b")
+    axes[0].axvline(thr, color="#c0392b", ls="--", label=f"threshold {thr:.2f}")
+    axes[0].set(yscale="log", xlabel="Robust tail score", ylabel="Players (log)", title="Tail score distribution")
+    axes[0].legend()
+    axes[1].scatter(S["iforest"], S["tail"], s=2, alpha=0.3, color="#245a9b", rasterized=True)
+    axes[1].axhline(thr, color="#c0392b", ls="--")
+    axes[1].set(xlabel="Isolation Forest score", ylabel="Robust tail score", title="Detector agreement")
+    fig.savefig(ASSETS / "anomaly-score-distribution.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+
+ARCHETYPES = [  # (name, box features); first match wins. Names are our reading of each cluster.
+    ("vpn_pricing_abuse", ["purchase_frequency__drift4", "purchase_frequency__spread"]),
+    ("account_takeover", ["currency_transfers__drift4", "currency_transfers__spread",
+                          "play_pattern_consistency__drift4", "location_changes__drift4",
+                          "geo__disp4", "geo__disp_max"]),
+    ("account_sale_boosting", ["skill_rating__drift4", "skill_trajectory__drift4",
+                               "skill_trajectory__spread", "friend_removes__drift4",
+                               "friend_removes__spread"]),
+    ("bot_24_7", ["login_time_variance__level", "ip_hash_entropy__level",
+                  "session_duration_std__level", "kda_std__level"]),
+    ("silent_account", ["communication_frequency__level"]),
+    ("low_activity", ["activity_level__level"]),
+    ("unstable_behavior", ["behavior_stability"]),
+]
+
+
+def archetypes(outside: pd.DataFrame, pred: pd.Series) -> pd.Series:
+    label = pd.Series(np.where(pred.to_numpy() == 1, "other_tail_outlier", "normal"), index=outside.index)
+    for name, cols in reversed(ARCHETYPES):
+        hit = outside[[c for c in cols if c in outside]].any(axis=1)
+        label[hit] = name
+    return label
+
+
+def explain(df: pd.DataFrame, F: pd.DataFrame, outside: pd.DataFrame, boxes: dict, pred: pd.Series) -> None:
+    label = archetypes(outside, pred)
+    counts = label[label != "normal"].value_counts().rename_axis("archetype").reset_index(name="players")
+    counts["share_of_all_players"] = (counts["players"] / len(df)).round(4)
+    counts.to_csv(ASSETS / "anomaly-archetypes.csv", index=False)
+    print(counts.to_string(index=False))
+
+    # One panel per box feature: the dense core vs the group beyond the gap.
+    show = [c for c in ["geo__disp_max", "skill_trajectory__drift4", "currency_transfers__drift4",
+                        "purchase_frequency__drift4", "ip_hash_entropy__level",
+                        "communication_frequency__level", "activity_level__level",
+                        "behavior_stability"] if c in boxes]
+    fig, axes = plt.subplots(2, 4, figsize=(16, 7))
+    for ax, c in zip(axes.flat, show):
+        lo, hi = boxes[c]
+        v = F[c]
+        inside = (v >= lo) & (v <= hi)
+        bins = np.linspace(v.min(), v.max(), 120)
+        ax.hist(v[inside], bins=bins, color="#245a9b", label="inside box")
+        ax.hist(v[~inside], bins=bins, color="#c0392b", label="outside box")
+        for edge in (lo, hi):
+            if np.isfinite(edge):
+                ax.axvline(edge, color="#333", ls="--", lw=0.8)
+        ax.set(yscale="log", title=c.replace("__", " · "), xlabel="value")
+    axes.flat[0].legend(fontsize=8)
+    fig.suptitle("Gap boxes: the dense core of each feature vs the players beyond an empty gap",
+                 x=0.01, ha="left", weight="bold")
+    fig.tight_layout()
+    fig.savefig(ASSETS / "gap-boxes.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+    pd.DataFrame({"player_id": df.player_id, "archetype": label}).to_csv(
+        ROOT / "predictions" / "archetypes.csv", index=False)
 
 
 if __name__ == "__main__":
