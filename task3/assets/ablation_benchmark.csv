@@ -1,7 +1,7 @@
-Architecture,Nested_OOF_NMAE,OOF_MAE_THB
-1. Frozen Two-Stage Hurdle Baseline,0.789609,2796.93
-2. Direct Raw-Scale L1 Ensemble (LGBM+CB+XGB),0.786369,2851.71
-3. Level-2 LGBM (MAE) Meta-Stacker,0.790111,2788.49
-4. 3-Family Two-Stage Log-Multiplier Hurdle,0.791231,2769.68
-5. Hybrid Hurdle + Raw-Scale L1 Ensemble,0.791633,2762.95
-6. Gated Super-Hybrid + Level-2 Meta-Stacker (Champion),0.791781,2760.47
+Paradigm,Validation Strategy,OOF MAE (THB),OOF NMAE Score,Delta vs Fold-Median (pp)
+Fold-training median baseline,5-fold outer OOF,10495.48,0.500037,0.0
+Stage-2 Log-Linear Ridge Hurdle (Standalone),5-fold outer OOF,2842.19,0.78693,28.6893
+LightGBM Quantile (BayesQ Q_{1-0.5/p}),5-fold outer OOF,2716.87,0.794393,29.4356
+XGBoost MultiQuantile (BayesQ Q_{1-0.5/p}),5-fold outer OOF,2714.42,0.794541,29.4504
+CatBoost MultiQuantile (BayesQ Q_{1-0.5/p}),5-fold outer OOF,2702.42,0.795263,29.5226
+Champion Nested Bayes-Optimal MultiQuantile,5-fold nested outer OOF (Promoted),2702.65,0.795249,29.5212
