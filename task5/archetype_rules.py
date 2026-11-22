@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.isotonic import IsotonicRegression
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 
 ROOT = Path(__file__).resolve().parent
@@ -107,6 +108,11 @@ def unstable_side_features(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
         pf_mean=pf.mean(axis=1),
         pf_sd=pf.std(axis=1),
         pf_n=pf.notna().sum(axis=1),
+        lc_std=lc.std(axis=1),
+        lc_range=lc.max(axis=1) - lc.min(axis=1),
+        pf_range=pf.max(axis=1) - pf.min(axis=1),
+        age_gt_800=(df.account_age_days >= 800).astype(float),
+        lc_norm_age=lc.mean(axis=1) / np.maximum(df.account_age_days, 1.0),
     )
     return X, hard
 
@@ -121,16 +127,20 @@ def unstable_nan_probability(df: pd.DataFrame, X: pd.DataFrame, hard: pd.Series)
         for tr, va in StratifiedKFold(5, shuffle=True, random_state=seed).split(Xk, yk):
             m = lgb.LGBMClassifier(
                 n_estimators=300, learning_rate=0.02, num_leaves=7, min_child_samples=30,
-                subsample=0.8, subsample_freq=1, random_state=seed, verbose=-1,
+                subsample=0.8, subsample_freq=1, random_state=seed, n_jobs=4, verbose=-1,
             ).fit(Xk.iloc[tr], yk[tr])
             oof[va] += m.predict_proba(Xk.iloc[va])[:, 1] / len(SEEDS)
             models.append(m)
     iso = IsotonicRegression(out_of_bounds="clip", y_min=0, y_max=1).fit(oof, yk)
+    z_oof = np.log(np.clip(oof, 1e-5, 1 - 1e-5) / (1.0 - np.clip(oof, 1e-5, 1 - 1e-5)))[:, None]
+    platt = LogisticRegression(C=10.0).fit(z_oof, yk)
     target = hard & ~known
     raw = np.mean([m.predict_proba(X[target])[:, 1] for m in models], axis=0)
+    z_raw = np.log(np.clip(raw, 1e-5, 1 - 1e-5) / (1.0 - np.clip(raw, 1e-5, 1 - 1e-5)))[:, None]
     p = pd.Series(0.0, index=df.index)
-    p[target] = iso.predict(raw)
-    calib = pd.DataFrame({"oof_raw": oof, "oof_calibrated": iso.predict(oof), "is_unstable": yk})
+    p[target] = 0.5 * iso.predict(raw) + 0.5 * platt.predict_proba(z_raw)[:, 1]
+    oof_cal = 0.5 * iso.predict(oof) + 0.5 * platt.predict_proba(z_oof)[:, 1]
+    calib = pd.DataFrame({"oof_raw": oof, "oof_calibrated": oof_cal, "is_unstable": yk})
     return p, calib
 
 

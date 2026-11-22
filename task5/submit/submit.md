@@ -4,18 +4,25 @@
 
 ## Current
 
-- **sha12:** `5e57282c6459` (since 2026-11-20, `05a762a`, #71)
-- **Active Version:** **Archetype rules + calibrated NaN-unstable recovery** (`bbb`, PR `#71`)
+- **sha12:** `b308313ff651` (since 2026-11-22, #82)
+- **Active Version:** **Archetype rules + rich NaN-unstable Platt/Isotonic50 recovery** (`Palapluem`, PR `#82`)
 - **Generating Script:** `task5/archetype_rules.py` (`uv run python archetype_rules.py`)
 - **Required Input:** `task5/data/test.csv` (`25,889` accounts × `123` columns)
 - **Outputs:** `task5/predictions/archetype-rules.csv`, `task5/assets/archetype-rule-counts.csv`, `task5/assets/erratic-combat-box.png`, `task5/assets/unstable-nan-calibration.csv`, `task5/assets/unstable-nan-cut-expected-f3.csv`
 - **Detector Components:**
   - Exact uniform-box rules for 8 injected archetypes (account_takeover, vpn_pricing_abuse, account_sale_boosting, bot_24_7, low_activity, silent_account, unstable_behavior, erratic_combat): `2,052` flags
-  - NaN `behavior_stability` recovery: hard filter (all `purchase_frequency` in [3, 6], age ≥ 795) + 5-seed × 5-fold LightGBM + isotonic calibration, cut `0.157` by expected F3: `+24` flags
-  - Masked OOF check on `22,926` players with known `behavior_stability` (value = 10·TP − flags): PR `1323` at its cut vs Run 22 `1303` at its cut; PR higher at every cut 0.08–0.20
-- **Test Distribution (`25,889` rows):** `0` (normal): `23,813` (`92.0%`), `1` (anomalous): `2,076` (`8.0%`)
+  - NaN `behavior_stability` recovery: hard filter (all `purchase_frequency` in [3, 6], age ≥ 795) + stability side features (`lc_std`, `lc_range`, `pf_range`, `age_gt_800`, `lc_norm_age`) + 5-seed × 5-fold LightGBM + 50/50 Platt & Isotonic calibration, cut `0.1068` (`0.107`) by expected F3: `+30` flags (`Expected F3 = 0.99790`)
+  - Masked OOF check on `22,926` players (`known & ~sure_7`, `2,393` hard-filter candidates, `246` positives): nested OOF `AUC 0.89795 → 0.91046`, `PR-AUC 0.62878 → 0.68293`, `LogLoss 0.20529 → 0.18360`, `10·TP − flags` `1,343 → 1,395` (`Boot P = 0.911`), passes two-way stratified split-half replication (`A→B` and `B→A`)
+- **Test Distribution (`25,889` rows):** `0` (normal): `23,807` (`92.0%`), `1` (anomalous): `2,082` (`8.0%`)
 
 ## Changelog
+
+### 2026-11-22 – `b308313ff651` – #82
+
+- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Prev: `5e57282c6459` | Δrows vs prev: 10 (0.0%)
+- Why: feat(task5): add stability features (`lc_std`, `lc_range`, `pf_range`, `age_gt_800`, `lc_norm_age`) and 50/50 Platt+Isotonic calibration to `unstable_nan_probability` (`task5/archetype_rules.py`); nested `22,926` masked OOF `AUC 0.89795→0.91046`, `PR 0.62878→0.68293`, `LL 0.20529→0.18360`, `10·TP−flags 1343→1395` (`Boot P=0.911`), wins both `A→B` and `B→A` split-half replications; `Expected F3 = 0.99790`, `+30` NaN flags (`+8/-2` vs #71)
+- Merged: `e952e560ec4c` | Kaggle public: –
 
 ### 2026-11-20 – `5e57282c6459` – #71
 
