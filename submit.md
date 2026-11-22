@@ -15,8 +15,8 @@ The merged `sha12` equals the `[sha:<hash>]` tag in each Kaggle note.
 | [Task 4](task4/submit/submit.md) | `cd9689ef4951` | 2026-11-22, #80 | Run 24 Dual-Regime SOTA Fusion (`CNXv3+DINOv3L+DINOv2+ViTs`) – `task4/scripts/fuse_t4_sota_trio.py` |
 | [Task 5](task5/submit/submit.md) | `5e57282c6459` | 2026-11-20, #71 | Archetype rules – `task5/archetype_rules.py` |
 
-- **Merged sha12:** `b2f908917ce1` – Kaggle public: –
-- **Best Kaggle public so far:** 0.86495 (merged `904a1fd0976c`, commit `5cdaf4f`)
+- **Merged sha12:** `b2f908917ce1` – Kaggle public: 0.86536
+- **Best Kaggle public so far:** 0.86536 (merged `b2f908917ce1`, commit `fb0da33`)
 
 ## Merged history
 
@@ -24,7 +24,7 @@ One row per `main` commit that changed any `task{N}/submit/index.csv`. "↩" mar
 
 | Date | Commit | PR | Merged sha12 | Tasks changed | Kaggle public | Note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-22 | `pending` | #80 | `b2f908917ce1` | 4 | – | feat(task4): Run 24 Dual-Regime SOTA Fusion CNXv3+DINOv3L (`OOF 0.993723`, `ExtHard6 0.968777`), 793 rows changed (3.1%) |
+| 2026-11-22 | `fb0da33` | #80 | `b2f908917ce1` | 4 | 0.86536 | feat(task4): Run 24 Dual-Regime SOTA Fusion CNXv3+DINOv3L (`OOF 0.993723`, `ExtHard6 0.968777`), 793 rows changed (3.1%) |
 | 2026-11-21 | `5cdaf4f` | #79 | `904a1fd0976c` | 2 | 0.86495 | Task 2 affine export fix; frozen-OOF macro F1 `0.753158` → `0.759316`, all five folds improve; 1,622 rows changed |
 | 2026-11-21 | `8e9eede` | #78 | `faeb950de6f5` | 1 | 0.86384 | Task 1 exp 005 account cohorts and skill classifier, 311 rows changed and OOF F2 `0.840965` |
 | 2026-11-21 | `pending` | #77 | `b7f0765d8736` | 4 | 0.86362 | ↩ same file as `2df195e`. fix(task4): revert task4 submit/index.csv to Run 22 after Run 23 0.86310 regression (#77) |

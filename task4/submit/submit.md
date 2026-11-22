@@ -23,10 +23,10 @@
 
 ### 2026-11-22 – `cd9689ef4951` – #80
 
-- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Commit: `fb0da33` by Palapluem (Wisit Suwannao)
 - Prev: `1cb773dd067e` | Δrows vs prev: 793 (3.1%)
 - Why: feat(task4): Run 24 Dual-Regime SOTA Fusion integrating 5-fold SGKF Nightmare-Hardened ConvNeXtV3-Base (`CNXv3-Base`) and DINOv3-ViT-L-16 (`DINOv3L-Hard`, `OOF_W6 F1 0.991660`, `ExtHard6 F1 0.962927`) with DINOv2-StageC and Base ViTs (`all_oof_f1 0.993723` vs Run 22 `0.991174`, `iso_oof_f1 0.993871`, `corrupt_oof_f1 0.988965`, `exthard6_oof_f1 0.968777`, `oof_logloss 0.020969`, `paired_bootstrap_vs_r22 1.0000`)
-- Merged: `b2f908917ce1` | Kaggle public: –
+- Merged: `b2f908917ce1` | Kaggle public: 0.86536
 
 ### 2026-11-21 – `1cb773dd067e` – #77
 
