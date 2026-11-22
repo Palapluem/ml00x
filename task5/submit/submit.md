@@ -19,10 +19,10 @@
 
 ### 2026-11-22 – `b308313ff651` – #82
 
-- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Commit: `571aefb` by Palapluem (Wisit Suwannao)
 - Prev: `5e57282c6459` | Δrows vs prev: 10 (0.0%)
 - Why: feat(task5): add stability features (`lc_std`, `lc_range`, `pf_range`, `age_gt_800`, `lc_norm_age`) and 50/50 Platt+Isotonic calibration to `unstable_nan_probability` (`task5/archetype_rules.py`); nested `22,926` masked OOF `AUC 0.89795→0.91046`, `PR 0.62878→0.68293`, `LL 0.20529→0.18360`, `10·TP−flags 1343→1395` (`Boot P=0.911`), wins both `A→B` and `B→A` split-half replications; `Expected F3 = 0.99790`, `+30` NaN flags (`+8/-2` vs #71)
-- Merged: `e952e560ec4c` | Kaggle public: –
+- Merged: `e952e560ec4c` | Kaggle public: 0.86530
 
 ### 2026-11-20 – `5e57282c6459` – #71
 

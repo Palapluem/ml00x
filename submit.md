@@ -15,7 +15,7 @@ The merged `sha12` equals the `[sha:<hash>]` tag in each Kaggle note.
 | [Task 4](task4/submit/submit.md) | `cd9689ef4951` | 2026-11-22, #80 | Run 24 Dual-Regime SOTA Fusion (`CNXv3+DINOv3L+DINOv2+ViTs`) – `task4/scripts/fuse_t4_sota_trio.py` |
 | [Task 5](task5/submit/submit.md) | `b308313ff651` | 2026-11-22, #82 | Archetype rules + rich NaN stability & Platt/Iso50 – `task5/archetype_rules.py` |
 
-- **Merged sha12:** `e952e560ec4c` – Kaggle public: –
+- **Merged sha12:** `e952e560ec4c` – Kaggle public: 0.86530
 - **Best Kaggle public so far:** 0.86536 (merged `b2f908917ce1`, commit `fb0da33`)
 
 ## Merged history
@@ -24,7 +24,7 @@ One row per `main` commit that changed any `task{N}/submit/index.csv`. "↩" mar
 
 | Date | Commit | PR | Merged sha12 | Tasks changed | Kaggle public | Note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-22 | `pending` | #82 | `e952e560ec4c` | 5 | – | feat(task5): rich stability features & Platt/Iso calibration for NaN-unstable recovery (`Masked AUC 0.8980→0.9105, PR 0.6288→0.6829, Expected F3 0.99790`), 10 rows changed |
+| 2026-11-22 | `571aefb` | #82 | `e952e560ec4c` | 5 | 0.86530 | feat(task5): rich stability features & Platt/Iso calibration for NaN-unstable recovery (`Masked AUC 0.8980→0.9105, PR 0.6288→0.6829, Expected F3 0.99790`), 10 rows changed |
 | 2026-11-22 | `fb0da33` | #80 | `b2f908917ce1` | 4 | 0.86536 | feat(task4): Run 24 Dual-Regime SOTA Fusion CNXv3+DINOv3L (`OOF 0.993723`, `ExtHard6 0.968777`), 793 rows changed (3.1%) |
 | 2026-11-21 | `5cdaf4f` | #79 | `904a1fd0976c` | 2 | 0.86495 | Task 2 affine export fix; frozen-OOF macro F1 `0.753158` → `0.759316`, all five folds improve; 1,622 rows changed |
 | 2026-11-21 | `8e9eede` | #78 | `faeb950de6f5` | 1 | 0.86384 | Task 1 exp 005 account cohorts and skill classifier, 311 rows changed and OOF F2 `0.840965` |
