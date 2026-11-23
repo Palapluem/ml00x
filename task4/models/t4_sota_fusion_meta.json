@@ -1,19 +1,21 @@
 {
   "discovered_fullres_models": [
     "cnxv3",
-    "dinov3l"
+    "dinov3l",
+    "eva02l"
   ],
   "clean_pool_weights": {
-    "ConvNeXtV2-SGKF": 0.0091,
-    "MLP-V3-SGKF": 0.0241,
-    "DINOv3-ViT-L": 0.0864,
-    "EVA02-Large": 0.225,
-    "EVA02-Base": 0.0468,
-    "DINOv2-StageC-2TTA": 0.0446,
-    "CNXv3-Base-Orig2": 0.0621,
-    "CNXv3-Base-Hard6": 0.2045,
-    "DINOv3L-Hard-Orig2": 0.178,
-    "DINOv3L-Hard-Hard6": 0.1192
+    "ConvNeXtV2-SGKF": 0.0008,
+    "MLP-V3-SGKF": 0.0005,
+    "DINOv3-ViT-L": 0.0631,
+    "EVA02-Large": 0.196,
+    "EVA02-Base": 0.0354,
+    "CNXv3-Base-Orig2": 0.0566,
+    "CNXv3-Base-Hard6": 0.1435,
+    "DINOv3L-Hard-Orig2": 0.1822,
+    "DINOv3L-Hard-Hard6": 0.046,
+    "EVA02L-Hard-Orig2": 0.1906,
+    "EVA02L-Hard-Hard6": 0.0853
   },
   "clean_pool_temps": {
     "ConvNeXtV2-SGKF": 0.662,
@@ -28,42 +30,45 @@
     "CNXv3-Base-Orig2": 0.7349,
     "CNXv3-Base-Hard6": 0.7203,
     "DINOv3L-Hard-Orig2": 0.7065,
-    "DINOv3L-Hard-Hard6": 0.6916
+    "DINOv3L-Hard-Hard6": 0.6916,
+    "EVA02L-Hard-Orig2": 0.7115,
+    "EVA02L-Hard-Hard6": 0.6942
   },
   "exthard_weights": {
-    "CNXv2-StageC-6TTA": 0.3483,
-    "DINOv2-StageC-6TTA": 0.0767,
-    "CNXv3-Base-Hard6": 0.1605,
-    "DINOv3L-Hard-Hard6": 0.4145
+    "CNXv2-StageC-6TTA": 0.323,
+    "DINOv2-StageC-6TTA": 0.0549,
+    "CNXv3-Base-Hard6": 0.0695,
+    "DINOv3L-Hard-Hard6": 0.2896,
+    "EVA02L-Hard-Hard6": 0.2629
   },
   "shift_gate": {
     "tau_js_99pct_iso": 0.016081,
     "gamma": 0.0,
     "test_rows_gated": 0
   },
-  "prior_debias_alpha": 0.69,
+  "prior_debias_alpha": 0.67,
   "fold_alphas": [
-    0.7,
-    0.7,
-    0.7,
-    0.7,
+    0.9,
+    0.6,
+    0.6,
+    0.6,
     0.65
   ],
   "metrics": {
-    "all_oof_f1": 0.993723,
-    "iso_oof_f1": 0.993871,
-    "corrupt_oof_f1": 0.988965,
-    "exthard6_oof_f1": 0.968777,
-    "oof_logloss": 0.020969,
-    "exthard6_logloss": 0.091773,
+    "all_oof_f1": 0.994122,
+    "iso_oof_f1": 0.995278,
+    "corrupt_oof_f1": 0.989391,
+    "exthard6_oof_f1": 0.970477,
+    "oof_logloss": 0.019381,
+    "exthard6_logloss": 0.087769,
     "run22_baseline_f1": 0.991174,
     "paired_bootstrap_vs_r22": 1.0
   },
   "test_distribution": {
-    "0": 3686,
-    "1": 6753,
-    "2": 3911,
-    "3": 6349,
-    "4": 5190
+    "0": 3688,
+    "1": 6737,
+    "2": 3956,
+    "3": 6323,
+    "4": 5185
   }
 }
