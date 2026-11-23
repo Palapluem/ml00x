@@ -72,6 +72,50 @@ def fit_exact_bayes_macro_f1(probs: np.ndarray, n_iter=60, damp=0.5):
     return *best_parameters, float(best_expected_f1)
 
 
+def fit_logit_bias(probabilities: np.ndarray, y_arr: np.ndarray) -> np.ndarray:
+    """Fit a zero-mean four-class logit bias by minimizing softmax cross-entropy."""
+    probabilities = validate_probabilities(probabilities)
+    y_int = np.asarray(y_arr, dtype=int)
+    if y_int.shape != (len(probabilities),) or (y_int < 0).any() or (y_int > 3).any():
+        raise ValueError("y_arr must be a 1D integer array of class labels in 0..3")
+
+    log_probs = np.log(np.clip(probabilities, 1e-12, 1.0))
+    one_hot = np.eye(4, dtype=np.float64)[y_int]
+
+    def loss_and_grad(bias: np.ndarray) -> tuple[float, np.ndarray]:
+        shifted = log_probs + bias[None, :]
+        shifted -= shifted.max(axis=1, keepdims=True)
+        exp_z = np.exp(shifted)
+        probs = exp_z / exp_z.sum(axis=1, keepdims=True)
+        nll = float(-np.log(np.clip(probs[np.arange(len(y_int)), y_int], 1e-12, 1.0)).mean())
+        grad = (probs - one_hot).mean(axis=0)
+        return nll, grad
+
+    result = minimize(
+        loss_and_grad,
+        np.zeros(4, dtype=np.float64),
+        jac=True,
+        method="BFGS",
+        options={"gtol": 1e-8},
+    )
+    if not np.isfinite(result.x).all():
+        raise RuntimeError(f"Logit bias optimization failed: {result.message}")
+    bias = np.asarray(result.x, dtype=np.float64)
+    return bias - np.mean(bias)
+
+
+def apply_logit_bias(probabilities: np.ndarray, bias: np.ndarray) -> np.ndarray:
+    """Shift class log-probabilities by a four-element bias vector and renormalize."""
+    probabilities = validate_probabilities(probabilities)
+    bias = np.asarray(bias, dtype=np.float64)
+    if bias.shape != (4,) or not np.isfinite(bias).all():
+        raise ValueError("bias must contain four finite class parameters")
+    shifted = np.log(np.clip(probabilities, 1e-12, 1.0)) + bias[None, :]
+    shifted -= shifted.max(axis=1, keepdims=True)
+    exp_z = np.exp(shifted)
+    return validate_probabilities(exp_z / exp_z.sum(axis=1, keepdims=True))
+
+
 def predict_segments(probabilities: np.ndarray, alpha: np.ndarray, beta: np.ndarray):
     """Apply argmax(alpha * probability - beta) in validation and deployment.
 

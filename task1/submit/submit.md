@@ -4,16 +4,23 @@
 
 ## Current
 
-- **sha12:** `af57ef293a3a` (2026-11-21, `6324964`, #78)
-- **Active Version:** **exp 005**, account cohort likelihoods + exp 004
+- **sha12:** `db458dfc73b4` (2026-11-23, `pending`, pending)
+- **Active Version:** **exp 006**, semi-supervised 5-profile Tobit-MVN + cohort likelihoods + exp 004
 - **Generating Script:** `task1/run_account_cohorts.py`. Run `uv run python run_account_cohorts.py --promote` from `task1/`.
-- **Required Artifacts:** `task1/predictions/experiments/004/{oof,test}.csv` and `task1/models/experiments/004/stack_meta.json`
-- **Outputs:** `task1/predictions/experiments/005/{oof,test}.csv`, `task1/models/experiments/005/metrics.json`, and `task1/assets/experiments/005/{results,per-fold-f2}.csv`
-- **OOF Metrics:** F2 `0.840965` (+`0.001388`), ROC AUC `0.896463`, PR AUC `0.840479`, log loss `0.351097`. F2 rose in all five folds. Paired row bootstrap 95% interval for the F2 gain is `[+0.000743, +0.002039]`.
-- **Validation:** Cohort ranges and blend weight came from exploratory analysis of the labeled data. Fold training estimated cohort weights, skill transforms, and classifier coefficients. Thresholds were tuned on the other OOF folds.
-- **Test Distribution (`25,889` rows):** `0`: `10,541` (`40.7%`), `1`: `15,348` (`59.3%`)
+- **Required Artifacts:** `task1/data/{train,test}.csv`, `task1/predictions/experiments/004/{oof,test}.csv`, `task1/predictions/experiments/005/oof.csv`, and `task1/models/experiments/004/stack_meta.json`
+- **Outputs:** `task1/predictions/experiments/006/{oof,test}.csv`, `task1/models/experiments/006/metrics.json`, and `task1/assets/experiments/006/{results,per-fold-f2}.csv`
+- **OOF Metrics:** F2 `0.841552` (+`0.000587` vs exp 005 `0.840965`), `f2_complete` `0.861372`, `f2_incomplete` `0.827756`, ROC AUC `0.896762`, PR AUC `0.840860`, log loss `0.350709`. F2 rose in all five folds vs exp 005. Paired row bootstrap 95% interval for the F2 gain is `[+0.000158, +0.001005]`.
+- **Validation:** Pure `train.csv` only (`90,816` labeled + `13,184` unlabeled rows; zero test leakage). Fits per-fold 1D Tobit EM on `game_sense_score` + Yeo-Johnson missing-data MVN-EM across 5 skill profiles + completeness-conditioned blending `(0.70, 0.10, 0.20)` complete / `(0.45, 0.40, 0.15)` incomplete.
+- **Test Distribution (`25,889` rows):** `0`: `10,619` (`41.0%`), `1`: `15,270` (`59.0%`)
 
 ## Changelog
+
+### 2026-11-23 – `db458dfc73b4` – pending
+
+- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Prev: `af57ef293a3a` | Δrows vs prev: 138 (0.5%)
+- Why: Experiment 006 adds a semi-supervised 5-profile Tobit(`game_sense_score`) + Yeo-Johnson shrunk-covariance MVN-EM model (`LL=0.350516`, `AUC=0.896642` using labeled + `13,184` unlabeled `train.csv` rows) and replaces uniform exp 005 blending with completeness-conditioned `(0.70, 0.10, 0.20)` complete / `(0.45, 0.40, 0.15)` incomplete fusion. Five-fold OOF F2 increases from `0.840965` to `0.841552` (+`0.000587`), winning `5/5` folds with paired bootstrap 95% CI `[+0.000158, +0.001005]`.
+- Merged: `f7b9737efffc` | Kaggle public: –
 
 ### 2026-11-21 – `af57ef293a3a` – #78
 
