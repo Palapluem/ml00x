@@ -4,7 +4,7 @@
 
 ## Current
 
-- **sha12:** `db458dfc73b4` (2026-11-23, `pending`, pending)
+- **sha12:** `db458dfc73b4` (2026-11-23, `5b5be0a`, #89)
 - **Active Version:** **exp 006**, semi-supervised 5-profile Tobit-MVN + cohort likelihoods + exp 004
 - **Generating Script:** `task1/run_account_cohorts.py`. Run `uv run python run_account_cohorts.py --promote` from `task1/`.
 - **Required Artifacts:** `task1/data/{train,test}.csv`, `task1/predictions/experiments/004/{oof,test}.csv`, `task1/predictions/experiments/005/oof.csv`, and `task1/models/experiments/004/stack_meta.json`
@@ -15,12 +15,12 @@
 
 ## Changelog
 
-### 2026-11-23 – `db458dfc73b4` – pending
+### 2026-11-23 – `db458dfc73b4` – #89
 
-- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Commit: `5b5be0a` by Palapluem (Wisit Suwannao)
 - Prev: `af57ef293a3a` | Δrows vs prev: 138 (0.5%)
 - Why: Experiment 006 adds a semi-supervised 5-profile Tobit(`game_sense_score`) + Yeo-Johnson shrunk-covariance MVN-EM model (`LL=0.350516`, `AUC=0.896642` using labeled + `13,184` unlabeled `train.csv` rows) and replaces uniform exp 005 blending with completeness-conditioned `(0.70, 0.10, 0.20)` complete / `(0.45, 0.40, 0.15)` incomplete fusion. Five-fold OOF F2 increases from `0.840965` to `0.841552` (+`0.000587`), winning `5/5` folds with paired bootstrap 95% CI `[+0.000158, +0.001005]`.
-- Merged: `f7b9737efffc` | Kaggle public: –
+- Merged: `f7b9737efffc` | Kaggle public: 0.86557
 
 ### 2026-11-21 – `af57ef293a3a` – #78
 

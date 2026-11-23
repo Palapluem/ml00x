@@ -4,7 +4,7 @@
 
 ## Current
 
-- **sha12:** `9adab5d3de0d` (2026-11-23, source `pending`, pending)
+- **sha12:** `9adab5d3de0d` (2026-11-23, source `5b5be0a`, #89)
 - **Active Version:** **Boundary-enhanced `0.90 ExactParamEM + 0.10 CB_Clean28` + 4-param logit bias + affine macro-F1 rule**
 - **Generating Script:** `task2/run_bayes_export.py`; run `uv run python run_bayes_export.py --promote` from `task2/`.
 - **Generating Notebook:** `task2/task2_player_segment.ipynb`; its single executable export calls the same `predict_segments` function as validation.
@@ -23,12 +23,12 @@
 
 ## Changelog
 
-### 2026-11-23 – `9adab5d3de0d` – pending
+### 2026-11-23 – `9adab5d3de0d` – #89
 
-- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Commit: `5b5be0a` by Palapluem (Wisit Suwannao)
 - Prev: `34d927a40901` | Δrows vs prev: 68 (0.3%)
 - Why: Replaces global log-loss SLSQP (which dropped `CB_Clean28` weight to `0.0` in folds 0/1/3) with boundary-improving `0.90 ExactParamEM + 0.10 CB_Clean28` + cross-fitted zero-mean 4-parameter logit bias calibration (`bias=[+0.002124, +0.002960, -0.006227, +0.001143]`) before `fit_exact_bayes_macro_f1`. Raises cross-fitted macro F1 from `0.759316` to `0.759799` (`5/5` folds vs EM alone, 95% bootstrap CI `[+0.000159, +0.000805]` vs `#79`), changing `68` test rows (`0.3%`).
-- Merged: `f7b9737efffc` | Kaggle public: –
+- Merged: `f7b9737efffc` | Kaggle public: 0.86557
 
 ### 2026-11-21 – `34d927a40901` – #79
 
