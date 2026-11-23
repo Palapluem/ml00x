@@ -4,8 +4,8 @@
 
 ## Current
 
-- **sha12:** `34d927a40901` (2026-11-21, source `2f988af`, #79)
-- **Active Version:** **Run 22 models with corrected affine macro-F1 export**
+- **sha12:** `9adab5d3de0d` (2026-11-23, source `pending`, pending)
+- **Active Version:** **Boundary-enhanced `0.90 ExactParamEM + 0.10 CB_Clean28` + 4-param logit bias + affine macro-F1 rule**
 - **Generating Script:** `task2/run_bayes_export.py`; run `uv run python run_bayes_export.py --promote` from `task2/`.
 - **Generating Notebook:** `task2/task2_player_segment.ipynb`; its single executable export calls the same `predict_segments` function as validation.
 - **Required Artifacts:**
@@ -13,15 +13,22 @@
   - `task2/predictions/model-level/segment-tuned-catboost-lightgbm-revised-2026-11-12-macro-f1-0.751314-oof.csv`
   - `task2/predictions/model-level/segment-tuned-catboost-lightgbm-revised-2026-11-12-macro-f1-0.751314-test-predictions.csv`
   - `task2/data/train.csv`, `task2/data/test.csv`
-- **Outputs:** `task2/predictions/bayes-export/{oof,test,index}.csv`, `task2/models/bayes-export/decision-rule.json`, `task2/assets/bayes-export/`.
+- **Outputs:** `task2/predictions/bayes-export/{oof,test,index}.csv`, `task2/predictions/test_predictions.csv`, `task2/models/bayes-export/decision-rule.json`, `task2/assets/bayes-export/`.
 - **OOF Metrics:**
-  - Corrected affine export macro F1 **`0.759316`**, versus **`0.753158`** for the previous executable export rule. Weighted F1 `0.771085` versus `0.763171`.
-  - All five folds improve; paired row-bootstrap 95% interval for macro-F1 gain: `[+0.004653, +0.007692]`.
-  - `OOF LogLoss = 0.595646`; existing log-loss stack and fixed-point decision fit are retained.
-- **Validation limits:** Cross-fitted postprocessing of frozen OOF probabilities, not fully nested base-model retraining. Other OOF models can have seen held-out postprocessing-fold labels. Bootstrap is conditional on these models and folds. The NPZ lacks row IDs; original order is assumed, input hashes are recorded, and keyed-model labels are checked. Corrected export has no Kaggle score yet.
-- **Test Distribution (`25,889` rows):** `0`: `10,558` (`40.8%`), `1`: `6,583` (`25.4%`), `2`: `5,046` (`19.5%`), `3`: `3,702` (`14.3%`)
+  - Cross-fitted macro F1 **`0.759799`** versus **`0.759316`** for `#79` and **`0.759201`** for `ExactParamEM` alone. Weighted F1 `0.771560` versus `0.771085`.
+  - Wins `5/5` folds vs `ExactParamEM` alone and `4/5` folds vs `#79`; paired row-bootstrap 95% interval vs `#79`: `[+0.000159, +0.000805]`.
+  - `OOF LogLoss = 0.595756`; combines `0.90 ExactParamEM + 0.10 CB_Clean28` with cross-fitted 4-parameter zero-mean logit bias calibration before `fit_exact_bayes_macro_f1`.
+- **Validation limits:** Cross-fitted postprocessing of frozen OOF probabilities, not fully nested base-model retraining. Other OOF models can have seen held-out postprocessing-fold labels. Bootstrap is conditional on these models and folds. The NPZ lacks row IDs; original order is assumed, input hashes are recorded, and keyed-model labels are checked.
+- **Test Distribution (`25,889` rows):** `0`: `10,587` (`40.9%`), `1`: `6,582` (`25.4%`), `2`: `5,012` (`19.4%`), `3`: `3,708` (`14.3%`)
 
 ## Changelog
+
+### 2026-11-23 – `9adab5d3de0d` – pending
+
+- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Prev: `34d927a40901` | Δrows vs prev: 68 (0.3%)
+- Why: Replaces global log-loss SLSQP (which dropped `CB_Clean28` weight to `0.0` in folds 0/1/3) with boundary-improving `0.90 ExactParamEM + 0.10 CB_Clean28` + cross-fitted zero-mean 4-parameter logit bias calibration (`bias=[+0.002124, +0.002960, -0.006227, +0.001143]`) before `fit_exact_bayes_macro_f1`. Raises cross-fitted macro F1 from `0.759316` to `0.759799` (`5/5` folds vs EM alone, 95% bootstrap CI `[+0.000159, +0.000805]` vs `#79`), changing `68` test rows (`0.3%`).
+- Merged: `f7b9737efffc` | Kaggle public: –
 
 ### 2026-11-21 – `34d927a40901` – #79
 

@@ -7,7 +7,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from bayes_decision import fit_exact_bayes_macro_f1, predict_segments
+from bayes_decision import (
+    apply_logit_bias,
+    fit_exact_bayes_macro_f1,
+    fit_logit_bias,
+    predict_segments,
+)
 
 
 def test_export_keeps_beta_and_negative_scores():
@@ -76,3 +81,29 @@ def test_notebook_executes_one_affine_export(tmp_path):
     assert saved.id.tolist() == [f"ANS{i + 1:05d}" for i in range(rows)]
     np.testing.assert_array_equal(saved.task2, details.segment)
     np.testing.assert_allclose(details[[f"prob_segment_{c}" for c in range(4)]], probabilities)
+
+
+def test_fit_and_apply_logit_bias_round_trip():
+    rng = np.random.default_rng(7)
+    logits = rng.normal(size=(800, 4))
+    shifted_logits = logits + np.array([0.3, -0.2, 0.1, -0.2])
+    probs_true = np.exp(shifted_logits - shifted_logits.max(axis=1, keepdims=True))
+    probs_true /= probs_true.sum(axis=1, keepdims=True)
+    y_arr = np.array([rng.choice(4, p=p) for p in probs_true])
+
+    uncal = np.exp(logits - logits.max(axis=1, keepdims=True))
+    uncal /= uncal.sum(axis=1, keepdims=True)
+    bias = fit_logit_bias(uncal, y_arr)
+    assert bias.shape == (4,)
+    assert abs(bias.mean()) < 1e-12
+
+    cal = apply_logit_bias(uncal, bias)
+    assert cal.shape == uncal.shape
+    np.testing.assert_allclose(cal.sum(axis=1), 1.0, atol=1e-8)
+
+
+@pytest.mark.parametrize("bad_bias", [[1.0, 2.0, 3.0], [0.0, float("nan"), 0.0, 0.0]])
+def test_apply_logit_bias_rejects_invalid_bias(bad_bias):
+    probs = np.array([[0.4, 0.3, 0.2, 0.1]])
+    with pytest.raises(ValueError):
+        apply_logit_bias(probs, np.array(bad_bias))
