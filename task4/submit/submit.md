@@ -4,22 +4,30 @@
 
 ## Current
 
-- **sha12:** `cd9689ef4951` (since 2026-11-22, #80)
-- **Active Version:** **Run 24 — Dual-Regime SOTA Fusion (`CNXv3-Base + DINOv3L-Hard + DINOv2 + Base ViTs`)** (`Palapluem`, PR `#80`)
+- **sha12:** `e146d960e1a0` (since 2026-11-23, #84)
+- **Active Version:** **Run 25 — Dual-Regime SOTA Trio Fusion (`CNXv3-Base + DINOv3L-Hard + EVA02L-Hard + DINOv2 + Base ViTs`)** (`Palapluem`, PR `#84`)
 - **Generating Script / Notebook:** `task4/scripts/fuse_t4_sota_trio.py`, `task4/task4_game_title_detection.ipynb`
 - **Required Artifacts:**
   - `task4/predictions/model-level/task4-sgkf-e2e-bundle.npz` (5-fold SGKF Pure-Train E2E `ConvNeXtV2`, `DINOv2-StageA/C`, `MLP-V3`)
   - `task4/predictions/model-level/task4-cnxv3-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-cnxv3-{orig2,hard6}-{oof,test-predictions}.csv`
   - `task4/predictions/model-level/task4-dinov3l-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-dinov3l-{orig2,hard6}-{oof,test-predictions}.csv`
+  - `task4/predictions/model-level/task4-eva02l-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-eva02l-{orig2,hard6}-{oof,test-predictions}.csv`
   - 8 base ViT CSVs in `task4/predictions/model-level/`: `task4-{dinov3-vitb,dinov3-vitl,eva02-base,eva02-large}-{oof,test-predictions}.csv`
   - `task4/models/t4_sota_fusion_meta.json`, `task4/data/train.csv`, `task4/data/test.csv`
 - **Method & OOF Metrics (`31,546` train images, 100% Pure-Train):**
-  - Dual-Regime Temperature-Calibrated Log-Odds SLSQP Clean Pool (`EVA02-Large=0.2250`, `CNXv3-Base-Hard6=0.2045`, `DINOv3L-Hard-Orig2=0.1780`, `DINOv3L-Hard-Hard6=0.1192`, `DINOv3-ViT-L=0.0864`, `CNXv3-Base-Orig2=0.0621`, `EVA02-Base=0.0468`, `DINOv2-StageC-2TTA=0.0446`, `MLP-V3-SGKF=0.0241`, `ConvNeXtV2-SGKF=0.0091`) + ExtHard6 Sub-Pool (`DINOv3L-Hard-Hard6=0.4145`, `CNXv2-StageC-6TTA=0.3483`, `CNXv3-Base-Hard6=0.1605`, `DINOv2-StageC-6TTA=0.0767`) with JS Shift Gate (`gamma=0.0`, `tau_js=0.016081`) + Pure-Train Nested Prior Debias (`alpha*=0.69`)
-  - `OOF Macro-F1 = 0.993723` | `OOF LogLoss = 0.020969` | `Iso(<0.75) F1 = 0.993871` | `Corrupt F1 = 0.988965` | `ExtHard6 F1 = 0.968777` | `ExtHard6 LogLoss = 0.091773` | `Paired Bootstrap vs Run 22 (0.991174) = 1.0000`
-- **Test Distribution (`25,889` rows):** `0` (`7-11k`): `3,686` (`14.2%`), `1` (`fiveN`): `6,753` (`26.1%`), `2` (`freefried`): `3,911` (`15.1%`), `3` (`pube`): `6,349` (`24.5%`), `4` (`roblock`): `5,190` (`20.0%`)
+  - Dual-Regime Temperature-Calibrated Log-Odds SLSQP Clean Pool (`EVA02-Large=0.1960`, `EVA02L-Hard-Orig2=0.1906`, `DINOv3L-Hard-Orig2=0.1822`, `CNXv3-Base-Hard6=0.1435`, `EVA02L-Hard-Hard6=0.0853`, `DINOv3-ViT-L=0.0631`, `CNXv3-Base-Orig2=0.0566`, `DINOv3L-Hard-Hard6=0.0460`, `EVA02-Base=0.0354`, `ConvNeXtV2-SGKF=0.0008`, `MLP-V3-SGKF=0.0005`) + ExtHard6 Sub-Pool (`CNXv2-StageC-6TTA=0.3230`, `DINOv3L-Hard-Hard6=0.2896`, `EVA02L-Hard-Hard6=0.2629`, `CNXv3-Base-Hard6=0.0695`, `DINOv2-StageC-6TTA=0.0549`) with JS Shift Gate (`gamma=0.0`, `tau_js=0.016081`) + Pure-Train Nested Prior Debias (`alpha*=0.67`)
+  - `OOF Macro-F1 = 0.994122` | `OOF LogLoss = 0.019381` | `Iso(<0.75) F1 = 0.995278` | `Corrupt F1 = 0.989391` | `ExtHard6 F1 = 0.970477` | `ExtHard6 LogLoss = 0.087769` | `Paired Bootstrap vs Run 22 (0.991174) = 1.0000`
+- **Test Distribution (`25,889` rows):** `0` (`7-11k`): `3,688` (`14.2%`), `1` (`fiveN`): `6,737` (`26.0%`), `2` (`freefried`): `3,956` (`15.3%`), `3` (`pube`): `6,323` (`24.4%`), `4` (`roblock`): `5,185` (`20.0%`)
   - *Note:* `index.csv` stores canonical numeric labels `0..4` (`AGENTS.md` schema).
 
 ## Changelog
+
+### 2026-11-23 – `e146d960e1a0` – #84
+
+- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Prev: `cd9689ef4951` | Δrows vs prev: 371 (1.4%)
+- Why: feat(task4): Run 25 Dual-Regime SOTA Trio Fusion integrating 5-fold SGKF Nightmare-Hardened EVA02-Large-448 (`EVA02L-Hard`, `OOF_W6 F1 0.991472`, `ExtHard6 F1 0.963912`, `LL 0.048044`) alongside `CNXv3-Base` and `DINOv3L-Hard` (`all_oof_f1 0.994122` vs Run 24 `0.993723`, `iso_oof_f1 0.995278`, `corrupt_oof_f1 0.989391`, `exthard6_oof_f1 0.970477`, `oof_logloss 0.019381`, `paired_bootstrap_vs_r22 1.0000`)
+- Merged: `ecadd77e92d2` | Kaggle public: pending
 
 ### 2026-11-22 – `cd9689ef4951` – #80
 
