@@ -24,10 +24,10 @@
 
 ### 2026-11-23 – `e146d960e1a0` – #84
 
-- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Commit: `2024555` by Palapluem (Wisit Suwannao)
 - Prev: `cd9689ef4951` | Δrows vs prev: 371 (1.4%)
 - Why: feat(task4): Run 25 Dual-Regime SOTA Trio Fusion integrating 5-fold SGKF Nightmare-Hardened EVA02-Large-448 (`EVA02L-Hard`, `OOF_W6 F1 0.991472`, `ExtHard6 F1 0.963912`, `LL 0.048044`) alongside `CNXv3-Base` and `DINOv3L-Hard` (`all_oof_f1 0.994122` vs Run 24 `0.993723`, `iso_oof_f1 0.995278`, `corrupt_oof_f1 0.989391`, `exthard6_oof_f1 0.970477`, `oof_logloss 0.019381`, `paired_bootstrap_vs_r22 1.0000`)
-- Merged: `ecadd77e92d2` | Kaggle public: pending
+- Merged: `ecadd77e92d2` | Kaggle public: 0.86540
 
 ### 2026-11-22 – `cd9689ef4951` – #80
 
