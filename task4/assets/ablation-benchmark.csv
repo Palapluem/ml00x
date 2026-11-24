@@ -1,6 +1,8 @@
 Model / Stage,Validation Protocol,Clean Unif-Prior F1,ExtHard6 Unif-Prior F1,OOF LogLoss,Key Architectural Change
 Individual: Base ViT EVA02-Large (224px),5-Fold CV,0.989078,,0.069633,High-res ViT baseline
-Individual: Full-Res CNXv3-Base (192x384 Hard6),5-Fold SGKF,0.988908,,0.053564,Hardened ConvNeXt DINOv3 backbone
+Individual: Full-Res CNXv3-Base (192x384 Hard6),5-Fold SGKF,0.988908,0.950293,0.053564,Hardened ConvNeXt DINOv3 backbone
+Individual: Full-Res DINOv3L-Hard (192x384 Hard6),5-Fold SGKF,0.991634,0.959898,0.048022,Hardened DINOv3-ViT-L backbone
+Individual: Full-Res EVA02L-Hard (192x384 Hard6),5-Fold SGKF,0.991497,0.959546,0.048044,Hardened EVA02-Large backbone
 "Individual: FoundVLM-v3-Joint12Blk (6-BB 13,568d)",5-Fold SGKF,0.9682,0.92521,0.10114,6 De-Corrupted v4 backbones fused jointly
 Stage 1: 9-Stream Base (E2E + ViTs + DINOv2),Nested 5-Fold SGKF,0.991313,,0.0263,Initial dual-regime baseline
 Stage 2: Hardened Trio + Restoration Shift Gate,Nested 5-Fold SGKF,0.994412,0.9688,0.019381,Adds 192x384 Hard6 models & JS shift gate

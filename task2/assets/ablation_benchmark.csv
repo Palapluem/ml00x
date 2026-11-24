@@ -1,0 +1,11 @@
+Model,OOF_LogLoss,OOF_Macro_F1,Blend_Weight
+ExactParamEM,0.59563,0.75848,0.9
+XGB_Clean28,0.6019,0.75747,0.0
+LGB_Clean28,0.60208,0.7569,0.0
+CB_Clean28,0.60233,0.75705,0.1
+CleanTabM_SWA3,0.60376,0.75589,0.0
+Fact_Clean28,0.61358,0.75571,0.0
+Oven_Rev,0.61651,0.75131,0.0
+Cross-Fitted 7-Model Blend (Argmax),0.59576,0.75867,1.0
+ExactParamEM (Cross-Fitted Affine Rule),0.59563,0.7592,1.0
+0.90 ExactParamEM + 0.10 CB_Clean28 + Logit-Bias + Affine Macro-F1 Rule,0.59576,0.7598,1.0

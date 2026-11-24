@@ -9,7 +9,7 @@
   "evaluation_protocol": "5 outer stratified folds; strict internal 90/10 early-stopping splits; nested inner BayesQ grid search",
   "external_verified_baseline_nmae": 0.7896088679,
   "fixed_reference_config": {
-    "model": "Run 16 V3 6-Stage-1 + 5-Family Q_FINE Hurdle",
+    "model": "Stage 1-4 Quantile Hurdle V3",
     "scale": 0.9975,
     "tau": 0.48
   },
@@ -59,10 +59,10 @@
   "library_versions": {
     "catboost": "1.2.10",
     "lightgbm": "4.7.0",
-    "numpy": "2.4.6",
+    "numpy": "2.5.4",
     "pandas": "3.1.0",
     "scikit-learn": "1.9.1",
-    "xgboost": "3.2.0"
+    "xgboost": "3.4.1"
   },
   "metric": "NMAE = 1 / (1 + sum(abs(y_true-y_pred)) / sum(y_true))",
   "n_samples_test": 25889,

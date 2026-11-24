@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -81,7 +80,7 @@ def js_divergence(p: np.ndarray, q: np.ndarray) -> np.ndarray:
 def geo_pool(models: List[np.ndarray], weights: np.ndarray, temps: List[float]) -> np.ndarray:
     """Temperature-scaled weighted log-odds geometric pooling."""
     lp = np.zeros_like(models[0], dtype=np.float64)
-    for p, w, t in zip(models, weights, temps):
+    for p, w, t in zip(models, weights, temps, strict=True):
         if float(w) <= 0.0:
             continue
         lp += float(w) * (np.log(np.clip(p, 1e-7, 1.0)) / float(t))
@@ -106,12 +105,18 @@ def fit_nested_temps_weighted(
             wt = sample_w[tr] / sample_w[tr].mean()
             tr_idx = np.arange(tr.sum())
 
-            def _nll(inv_t: np.ndarray) -> float:
-                sc = log_p[tr] * inv_t[0]
+            def _nll(
+                inv_t: np.ndarray,
+                _lp: np.ndarray = log_p[tr],
+                _wt: np.ndarray = wt,
+                _idx: np.ndarray = tr_idx,
+                _y: np.ndarray = y[tr],
+            ) -> float:
+                sc = _lp * inv_t[0]
                 sc -= sc.max(axis=1, keepdims=True)
                 pr = np.exp(sc)
                 pr /= pr.sum(axis=1, keepdims=True)
-                return float(-np.mean(wt * np.log(np.clip(pr[tr_idx, y[tr]], 1e-12, 1.0))))
+                return float(-np.mean(_wt * np.log(np.clip(pr[_idx, _y], 1e-12, 1.0))))
 
             res = minimize(_nll, [1.0], bounds=[(0.3, 2.0)], method="L-BFGS-B")
             fold_ts.append(float(1.0 / res.x[0]))
@@ -135,16 +140,22 @@ def fit_nested_pool_weights(
         tr, va = folds != k, folds == k
         wt = sample_w[tr] / sample_w[tr].mean()
         tr_idx = np.arange(tr.sum())
-        lps_tr = [np.log(np.clip(p[tr], 1e-7, 1.0)) / t for p, t in zip(models, temps)]
+        lps_tr = [np.log(np.clip(p[tr], 1e-7, 1.0)) / t for p, t in zip(models, temps, strict=True)]
 
-        def _obj(w: np.ndarray) -> float:
+        def _obj(
+            w: np.ndarray,
+            _lps: List[np.ndarray] = lps_tr,
+            _wt: np.ndarray = wt,
+            _idx: np.ndarray = tr_idx,
+            _y: np.ndarray = y[tr],
+        ) -> float:
             w = np.maximum(w, 0.0)
             w = w / (w.sum() + 1e-12)
-            lp = sum(wi * lp_i for wi, lp_i in zip(w, lps_tr))
+            lp = sum((wi * lp_i for wi, lp_i in zip(w, _lps, strict=True)), start=0.0)
             lp -= lp.max(axis=1, keepdims=True)
             ep = np.exp(lp)
             pr = ep / ep.sum(axis=1, keepdims=True)
-            return float(-np.mean(wt * np.log(np.clip(pr[tr_idx, y[tr]], 1e-12, 1.0))))
+            return float(-np.mean(_wt * np.log(np.clip(pr[_idx, _y], 1e-12, 1.0))))
 
         cons = {"type": "eq", "fun": lambda w: float(np.sum(w)) - 1.0}
         res = minimize(_obj, np.ones(m) / m, bounds=bounds, constraints=cons, method="SLSQP")
@@ -543,9 +554,9 @@ def run_fusion(
 
     summary: Dict[str, object] = {
         "discovered_fullres_models": list(discovered_fullres.keys()),
-        "clean_pool_weights": {n: round(float(w), 4) for n, w in zip(pool_names, w_clean) if w > 1e-4},
-        "clean_pool_temps": {n: round(float(t), 4) for n, t in zip(pool_names, T_pool)},
-        "exthard_weights": {n: round(float(w), 4) for n, w in zip(hard_names, w_hard)},
+        "clean_pool_weights": {n: round(float(w), 4) for n, w in zip(pool_names, w_clean, strict=True) if w > 1e-4},
+        "clean_pool_temps": {n: round(float(t), 4) for n, t in zip(pool_names, T_pool, strict=True)},
+        "exthard_weights": {n: round(float(w), 4) for n, w in zip(hard_names, w_hard, strict=True)},
         "shift_gate": {
             "tau_js_98pct_iso": round(tau_js, 6),
             "gamma": round(opt_gamma, 4),
