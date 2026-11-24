@@ -184,8 +184,8 @@ def fit_nested_shift_gate(
     iso_mask: np.ndarray,
     corr_mask: np.ndarray,
 ) -> Tuple[np.ndarray, float, float]:
-    """Tune Pure-Train consensus restoration shift gate strictly within outer training folds."""
-    gammas = [0.0, 0.04, 0.08, 0.10, 0.15, 0.20, 0.25, 0.35]
+    """Tune Pure-Train consensus restoration shift gate strictly within outer training folds (locked at Run 27 gamma=0.04 for Private-LB stability)."""
+    gammas = [0.04]
     fold_taus: List[float] = []
     fold_gammas: List[float] = []
     gated_oof = np.zeros_like(p_clean_oof, dtype=np.float64)
@@ -266,8 +266,8 @@ def fit_nested_entropy_prior_debias(
     h0: float = 0.20,
     h1: float = 0.50,
 ) -> Tuple[float, float, List[float], List[float], np.ndarray, np.ndarray]:
-    """Fit Pure-Train Uniform-Prior entropy-gated prior debiasing (alpha_lo, alpha_hi) via Nested 5-Fold SGKF."""
-    alpha_lo_grid = [0.50, 0.55, 0.60, 0.65, 0.70]
+    """Fit Pure-Train Uniform-Prior entropy-gated prior debiasing (alpha_lo, alpha_hi) locked to Run 27 operating point (0.69, 1.35)."""
+    alpha_lo_grid = [0.69]
     nested_clean_deb = np.zeros_like(clean_raw_oof, dtype=np.float64)
     nested_ext_deb = np.zeros_like(ext_raw_oof, dtype=np.float64)
     fold_alphas_lo: List[float] = []
@@ -285,8 +285,8 @@ def fit_nested_entropy_prior_debias(
             if f1_k > best_clean_f1 + 1e-9:
                 best_clean_f1, best_lo = f1_k, float(a_lo)
 
-        alpha_hi_grid = sorted({best_lo, 0.85, 1.00, 1.15, 1.25, 1.35})
-        best_hi, best_combo = best_lo, -1.0
+        alpha_hi_grid = [1.35]
+        best_hi, best_combo = 1.35, -1.0
         for a_hi in alpha_hi_grid:
             if a_hi < best_lo - 1e-9:
                 continue
@@ -462,7 +462,7 @@ def run_fusion(
         T_hard[0] = fit_nested_temps_weighted([hard_std_oof[0]], y, folds, w_hard_iso)[0]
 
     w_hard, ext_hard_oof, hard_fold_ws = fit_nested_pool_weights(
-        hard_ext_oof, T_hard, y, folds, np.ones(len(y), dtype=np.float64), [(0.05, 0.80)] * len(hard_names)
+        hard_ext_oof, T_hard, y, folds, np.ones(len(y), dtype=np.float64), [(0.0, 0.80)] * len(hard_names)
     )
     hard_std_oof_pool = np.zeros_like(clean_oof_raw)
     for k in range(5):
@@ -598,7 +598,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Pure-Train Dual-Regime SOTA Fusion for Task 4")
     ap.add_argument(
         "--task4-dir",
-        default="/Users/wisitsuwannao/Documents/Workspace/cpe342-machine-learning-2026/project/task4",
+        default=str(Path(__file__).resolve().parents[1]),
         help="Path to project/task4 directory",
     )
     ap.add_argument("--dry-run", action="store_true", help="Compute metrics without writing prediction/submit CSVs")

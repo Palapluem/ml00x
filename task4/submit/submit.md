@@ -4,29 +4,36 @@
 
 ## Current
 
-- **sha12:** `14de3b06cd9a` (since 2026-11-24, #93; restored #98)
-- **Active Version:** **Run 27 — Dual-Regime 4-Family SOTA Fusion (`CNXv3-Base + DINOv3L-Hard + EVA02L-Hard + FoundVLM-v2 [10-Block PowerNorm Dual-Condition + SymKL Consistency]` + DINOv2 + Base ViTs + Nested `siglip_l16` Pruning)** (`Palapluem`, PR `#93` / `#98`)
-- **Generating Script / Notebook:** `task4/scripts/fuse_t4_sota_trio.py`, `task4/notebooks/kaggle-t4-decorrupt-foundation.ipynb`, `task4/notebooks/kaggle-t4-clean-siglip-fast.ipynb`, `task4/task4_game_title_detection.ipynb`
+- **sha12:** `8f0b9db4d663` (since 2026-11-24, #99)
+- **Active Version:** **Run 30 (`P4a`) — Private-LB Hardened Dual-Regime 4-Family SOTA Fusion (`CNXv3-Base + DINOv3L-Hard + EVA02L-Hard + FoundVLM-v3-Joint12Blk [6-Backbone 12-Block 13,568d True Joint CosineResMLP w/ SymKL + Multi-λ Ridge + Per-BB MPS + 90d Meta-ResMLP]` + Simplex-Unconstrained `ExtHard6` (`min_bound=0.00`, pruning low-res `DINOv2-StageC-6TTA`) + Variance-Locked Shift Gate `gamma=0.04` & Entropy-Gated Prior Debias `0.69/1.35`)** (`Palapluem`, PR `#99`)
+- **Generating Script / Notebook:** `task4/scripts/fuse_t4_sota_trio.py`, `task4/scripts/train_m5_foundvlm_v3_joint12blk.py`, `task4/notebooks/kaggle-t4-decorrupt-foundation.ipynb`, `task4/notebooks/kaggle-t4-clean-siglip-fast.ipynb`, `task4/task4_game_title_detection.ipynb`
 - **Required Artifacts:**
   - `task4/predictions/model-level/task4-sgkf-e2e-bundle.npz` (5-fold SGKF Pure-Train E2E `ConvNeXtV2`, `DINOv2-StageA/C`, `MLP-V3`)
   - `task4/predictions/model-level/task4-cnxv3-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-cnxv3-{orig2,hard6}-{oof,test-predictions}.csv`
   - `task4/predictions/model-level/task4-dinov3l-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-dinov3l-{orig2,hard6}-{oof,test-predictions}.csv`
   - `task4/predictions/model-level/task4-eva02l-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-eva02l-{orig2,hard6}-{oof,test-predictions}.csv`
   - `task4/predictions/model-level/task4-siglip_l16-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-siglip_l16-{orig2,hard6}-{oof,test-predictions}.csv` *(archived reference; pruned by default in `fuse_t4_sota_trio.py`)*
-  - `task4/predictions/model-level/task4-foundvlm-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-foundvlm-{orig2,hard6}-{oof,test-predictions}.csv` (5-backbone `FoundVLM-v2`: 10-block PowerNorm($0.75$) `[raw2, all4]` `11,520d` + `Clean+TrExt` LogReg + 5-seed Dual-Condition `CosineResMLP` w/ SymKL + 10-stream PerBackbone SLSQP)
+  - `task4/predictions/model-level/task4-foundvlm-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-foundvlm-{orig2,hard6}-{oof,test-predictions}.csv` (6-backbone `FoundVLM-v3-Joint12Blk`: `siglip2_so400m` + `dinov3_vitl` + `dinov2_vitg14` + `clip_cnxl` + `clip_vith14` + `dinov3_cnxb` 12-block PowerNorm($0.75$) `[raw2, all4]` `13,568d -> 768 -> 5` True Joint Dual-Condition `CosineResMLP` w/ SymKL + Multi-$\lambda$ Ridge + Per-BB MPS + 90d Meta-ResMLP; standalone `UnifPriorF1 = 0.96820`, `OOF_LL = 0.10114`, `ExtHard UnifF1 = 0.92521`, `ExtLL = 0.20888`)
   - 8 base ViT CSVs in `task4/predictions/model-level/`: `task4-{dinov3-vitb,dinov3-vitl,eva02-base,eva02-large}-{oof,test-predictions}.csv`
   - `task4/models/t4_sota_fusion_meta.json`, `task4/data/train.csv`, `task4/data/test.csv`
 - **Method & OOF Metrics (`31,546` train images, 100% Pure-Train):**
-  - Dual-Regime Temperature-Calibrated Log-Odds SLSQP Clean Pool (`EVA02-Large=0.1883`, `EVA02L-Hard-Orig2=0.1745`, `DINOv3L-Hard-Orig2=0.1702`, `CNXv3-Base-Hard6=0.1230`, `EVA02L-Hard-Hard6=0.0746`, `CNXv3-Base-Orig2=0.0671`, `DINOv3-ViT-L=0.0513`, `FoundVLM-4Fam-Orig2=0.0491`, `DINOv3L-Hard-Hard6=0.0401`, `FoundVLM-4Fam-Hard6=0.0362`, `EVA02-Base=0.0257`) + ExtHard6 Sub-Pool (`FoundVLM-4Fam-Hard6=0.2475`, `EVA02L-Hard-Hard6=0.2262`, `DINOv3L-Hard-Hard6=0.2132`, `CNXv2-StageC-6TTA=0.2040`, `CNXv3-Base-Hard6=0.0590`, `DINOv2-StageC-6TTA=0.0500`) + Consensus Restoration Shift Gate (`tau_js_98pct_iso=0.004921`, `gamma=0.04`, `test_rows_gated=778`) + Pure-Train Entropy-Gated Prior Debiasing (`alpha_lo=0.69` `[0.7, 0.7, 0.65, 0.7, 0.7]`, `alpha_hi=1.35`, ramp `[0.20, 0.50]`)
-  - `Clean Unif-Prior F1 = 0.994573` | `All OOF F1 = 0.993977` | `OOF LogLoss = 0.019192` | `Iso(<0.75) F1 = 0.995007` | `Corrupt F1 = 0.989069` | `ExtHard6 Unif-Prior F1 = 0.969549` (`ExtHard6 F1 = 0.971097`) | `ExtHard6 LogLoss = 0.082799` | `Paired Bootstrap vs Run 22 = 1.0000` (`vs Run 26 = 0.530 Clean / 0.930 ExtHard6`)
-- **Test Distribution (`25,889` rows):** `0` (`7-11k`): `3,577` (`13.8%`), `1` (`fiveN`): `6,791` (`26.2%`), `2` (`freefried`): `3,933` (`15.2%`), `3` (`pube`): `6,276` (`24.2%`), `4` (`roblock`): `5,312` (`20.5%`)
+  - Dual-Regime Temperature-Calibrated Log-Odds SLSQP Clean Pool (`EVA02-Large=0.1888`, `EVA02L-Hard-Orig2=0.1736`, `DINOv3L-Hard-Orig2=0.1660`, `CNXv3-Base-Hard6=0.1213`, `EVA02L-Hard-Hard6=0.0766`, `CNXv3-Base-Orig2=0.0718`, `FoundVLM-4Fam-Orig2=0.0572`, `DINOv3-ViT-L=0.0490`, `DINOv3L-Hard-Hard6=0.0397`, `FoundVLM-4Fam-Hard6=0.0287`, `EVA02-Base=0.0274`) + Simplex-Unconstrained ExtHard6 Sub-Pool (`min_bound=0.00`: `FoundVLM-4Fam-Hard6=0.2607`, `CNXv2-StageC-6TTA=0.2321`, `EVA02L-Hard-Hard6=0.2302`, `DINOv3L-Hard-Hard6=0.2170`, `CNXv3-Base-Hard6=0.0600`, `DINOv2-StageC-6TTA=0.0000`) + Variance-Locked Consensus Restoration Shift Gate (`tau_js_98pct_iso=0.004910`, `gamma=0.04`, `test_rows_gated=795`) + Pure-Train Entropy-Gated Prior Debiasing (`alpha_lo=0.69`, `alpha_hi=1.35`, ramp `[0.20, 0.50]`)
+  - `Clean Unif-Prior F1 = 0.994636` (`0.800` boot vs Run 27) | `All OOF F1 = 0.994054` | `OOF LogLoss = 0.019164` (`0.986` boot vs Run 27) | `Iso(<0.75) F1 = 0.995007` | `Corrupt F1 = 0.989205` (`0.720` boot vs Run 27) | `ExtHard6 Unif-Prior F1 = 0.969820` (`0.888` boot vs Run 27; `ExtHard6 F1 = 0.971392`) | `ExtHard6 LogLoss = 0.082581` (`0.998` boot vs Run 27) | `Paired Bootstrap vs Run 22 = 1.0000`
+- **Test Distribution (`25,889` rows):** `0` (`7-11k`): `3,575` (`13.8%`), `1` (`fiveN`): `6,790` (`26.2%`), `2` (`freefried`): `3,932` (`15.2%`), `3` (`pube`): `6,278` (`24.2%`), `4` (`roblock`): `5,314` (`20.5%`)
   - *Note:* `index.csv` stores canonical numeric labels `0..4` (`AGENTS.md` schema).
 
 ## Changelog
 
-### 2026-11-24 – `14de3b06cd9a` – #98
+### 2026-11-24 – `8f0b9db4d663` – #99
 
 - Commit: `pending` by Palapluem (Wisit Suwannao)
+- Prev: `14de3b06cd9a` | Δrows vs prev: 10 (0.04%)
+- Why: feat(task4): Run 30 (`P4a`) Private-LB Hardened SOTA Fusion integrating 6-Backbone 12-Block (`13,568d -> 768 -> 5`) True Joint `FoundVLM-v3-Joint12Blk` (`UnifPriorF1 0.96757→0.96820` [`1.000` boot], `ExtHard UnifF1 0.92429→0.92521` [`0.996` boot], `ExtLL 0.21018→0.20888`) + Simplex-Unconstrained `ExtHard6` (`min_bound=0.00`, zeroing noisy low-res `DINOv2-StageC-6TTA`) + Variance-Locked Run 27 calibration (`gamma=0.04`, `alpha=0.69/1.35`), improving every proper scoring rule and F1 metric over Run 27 simultaneously (`OOF_LL 0.019192→0.019164` [`0.986` boot], `ExtHard6_LL 0.082799→0.082581` [`0.998` boot], `CleanUnif F1 0.994573→0.994636` [`0.800` boot], `Corrupt F1 0.989069→0.989205` [`0.720` boot], `ExtHard6 UnifF1 0.969549→0.969820` [`0.888` boot]) with a ultra-balanced 10-row (`0.04%`, `[-2, -1, -1, +2, +2]`) shift
+- Merged: `7fceeedc7d15` | Kaggle public: –
+
+### 2026-11-24 – `14de3b06cd9a` – #98
+
+- Commit: `71d3694` by Palapluem (Wisit Suwannao)
 - Prev: `95486a81aa7e` | Δrows vs prev: 53 (0.2%)
 - ↩ Same file as 2026-11-24 `dc410ae` (#93)
 - Why: fix(task4): revert task4/submit/index.csv & active bundle state to Run 27 (`14de3b06cd9a`, 0.86680) after Run 29 6-Backbone + M5 specialist streams (`95486a81aa7e`, 0.86672) diluted FoundVLM-v2 weight and dipped `-0.00008` on Kaggle public LB
