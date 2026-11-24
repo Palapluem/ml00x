@@ -1,9 +1,9 @@
-Model / System,Protocol,Clean Unif-Prior F1,ExtHard6 Unif-Prior F1,OOF LogLoss,Notes
-Individual: Base ViT EVA02-Large (224px),Clean 5-Fold,0.989078,,0.069633,Baseline ViT stream
-Individual: Full-Res CNXv3-Base (192x384 Hard6),5-Fold SGKF,0.988908,,0.053564,High-res ConvNeXt DINOv3
-"Individual: FoundVLM-v3-Joint12Blk (6-BB 13,568d)",5-Fold SGKF,0.9682,0.92521,0.10114,6 Foundation backbones joint
-Run 22 Baseline (9-Stream E2E+ViT+DINOv2),Nested 5-Fold SGKF,0.991313,,0.0263,Kaggle Public 0.86337
-Run 25-V2 (Trio Hardened + Shift Gate 0.10),Nested 5-Fold SGKF,0.994412,0.9688,0.019381,Kaggle Public 0.86545
-Run 26 (+SigLIPL16 + FoundVLM-v1 5-BB),Nested 5-Fold SGKF,0.994567,0.968804,0.018961,Kaggle Public 0.86674
-Run 27 (FoundVLM-v2 10-Blk SymKL + Gate 0.04),Nested 5-Fold SGKF,0.994573,0.969549,0.019192,Best Public LB 0.86680 (Final #1)
-Run 30 P4a (Joint-12Blk + Unconstrained ExtHard6),Nested 5-Fold SGKF,0.994636,0.96982,0.019164,Best Proper Loss & ExtHard6 0.86678 (Final #2)
+Model / Stage,Validation Protocol,Clean Unif-Prior F1,ExtHard6 Unif-Prior F1,OOF LogLoss,Key Architectural Change
+Individual: Base ViT EVA02-Large (224px),5-Fold CV,0.989078,,0.069633,High-res ViT baseline
+Individual: Full-Res CNXv3-Base (192x384 Hard6),5-Fold SGKF,0.988908,,0.053564,Hardened ConvNeXt DINOv3 backbone
+"Individual: FoundVLM-v3-Joint12Blk (6-BB 13,568d)",5-Fold SGKF,0.9682,0.92521,0.10114,6 De-Corrupted v4 backbones fused jointly
+Stage 1: 9-Stream Base (E2E + ViTs + DINOv2),Nested 5-Fold SGKF,0.991313,,0.0263,Initial dual-regime baseline
+Stage 2: Hardened Trio + Restoration Shift Gate,Nested 5-Fold SGKF,0.994412,0.9688,0.019381,Adds 192x384 Hard6 models & JS shift gate
+Stage 3: + 5-Backbone De-Corrupted FoundVLM-v1,Nested 5-Fold SGKF,0.994567,0.968804,0.018961,Adds frozen multi-VLM semantic features
+Stage 4: + Dual-Condition SymKL FoundVLM-v2,Nested 5-Fold SGKF,0.994573,0.969549,0.019192,10-block PowerNorm + SymKL consistency
+Stage 5 (Final): + 6-BB Joint-12Blk & Unconstrained ExtHard6,Nested 5-Fold SGKF,0.994636,0.96982,0.019164,"12-block 13,568d joint MLP + ExtHard6 min_bound=0.00"
