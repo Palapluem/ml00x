@@ -35,13 +35,27 @@ CLASS_MAP: Dict[str, int] = {
     "pube": 3,
     "roblock": 4,
 }
-DEFAULT_FULLRES_KEYS = ("cnxv3", "dinov3l", "eva02l", "siglip_l16", "cnxv2b")
+DEFAULT_FULLRES_KEYS = (
+    "cnxv3",
+    "dinov3l",
+    "eva02l",
+    "siglip_l16",
+    "siglip_so400m",
+    "cnxv2b",
+    "foundvlm",
+    "clean_siglip",
+    "clean_dinov3l",
+)
 HARDENED_LABELS = {
     "cnxv3": "CNXv3-Base",
     "dinov3l": "DINOv3L-Hard",
     "eva02l": "EVA02L-Hard",
     "siglip_l16": "SigLIPL16-Hard",
+    "siglip_so400m": "SigLIPSO400M-Hard",
     "cnxv2b": "CNXv2B-Hard",
+    "foundvlm": "FoundVLM-4Fam",
+    "clean_siglip": "CleanSigLIP-SO400M",
+    "clean_dinov3l": "CleanDINOv3L",
 }
 
 
@@ -132,7 +146,8 @@ def fit_nested_pool_weights(
             pr = ep / ep.sum(axis=1, keepdims=True)
             return float(-np.mean(wt * np.log(np.clip(pr[tr_idx, y[tr]], 1e-12, 1.0))))
 
-        res = minimize(_obj, np.ones(m) / m, bounds=bounds, method="SLSQP")
+        cons = {"type": "eq", "fun": lambda w: float(np.sum(w)) - 1.0}
+        res = minimize(_obj, np.ones(m) / m, bounds=bounds, constraints=cons, method="SLSQP")
         wk = np.maximum(res.x, 0.0)
         wk /= wk.sum()
         fold_ws.append(wk)
@@ -200,6 +215,24 @@ def fit_nested_shift_gate(
     return gated_oof, float(np.mean(fold_taus)), float(np.mean(fold_gammas))
 
 
+def apply_entropy_gated_prior_debias(
+    p_raw: np.ndarray,
+    pi_vec: np.ndarray,
+    alpha_lo: float,
+    alpha_hi: float,
+    h0: float = 0.20,
+    h1: float = 0.50,
+) -> np.ndarray:
+    """Apply smooth pure-train entropy-gated class-prior debiasing in log-probability space."""
+    h = entropy_norm(p_raw)
+    ramp = np.clip((h - h0) / max(h1 - h0, 1e-4), 0.0, 1.0)
+    alpha_row = float(alpha_lo) + (float(alpha_hi) - float(alpha_lo)) * ramp
+    lp = np.log(norm_p(p_raw)) - alpha_row[:, None] * np.log(np.clip(pi_vec, 1e-6, 1.0))[None, :]
+    lp -= lp.max(axis=1, keepdims=True)
+    ep = np.exp(lp)
+    return ep / ep.sum(axis=1, keepdims=True)
+
+
 def fit_nested_prior_debias(
     oof_raw: np.ndarray,
     y: np.ndarray,
@@ -223,6 +256,65 @@ def fit_nested_prior_debias(
         pv = oof_raw[va] / (pi_k[None, :] ** best_a)
         nested_deb[va] = pv / pv.sum(axis=1, keepdims=True)
     return float(np.mean(fold_alphas)), fold_alphas, nested_deb
+
+
+def fit_nested_entropy_prior_debias(
+    clean_raw_oof: np.ndarray,
+    ext_raw_oof: np.ndarray,
+    y: np.ndarray,
+    folds: np.ndarray,
+    h0: float = 0.20,
+    h1: float = 0.50,
+) -> Tuple[float, float, List[float], List[float], np.ndarray, np.ndarray]:
+    """Fit Pure-Train Uniform-Prior entropy-gated prior debiasing (alpha_lo, alpha_hi) via Nested 5-Fold SGKF."""
+    alpha_lo_grid = [0.50, 0.55, 0.60, 0.65, 0.70]
+    nested_clean_deb = np.zeros_like(clean_raw_oof, dtype=np.float64)
+    nested_ext_deb = np.zeros_like(ext_raw_oof, dtype=np.float64)
+    fold_alphas_lo: List[float] = []
+    fold_alphas_hi: List[float] = []
+
+    for k in range(5):
+        tr, va = folds != k, folds == k
+        pi_k = np.bincount(y[tr], minlength=5).astype(np.float64) / tr.sum()
+        sw_k = 1.0 / pi_k[y[tr]]
+
+        best_lo, best_clean_f1 = 0.60, -1.0
+        for a_lo in alpha_lo_grid:
+            pa = clean_raw_oof[tr] / (pi_k[None, :] ** a_lo)
+            f1_k = float(f1_score(y[tr], pa.argmax(1), average="macro", sample_weight=sw_k))
+            if f1_k > best_clean_f1 + 1e-9:
+                best_clean_f1, best_lo = f1_k, float(a_lo)
+
+        alpha_hi_grid = sorted({best_lo, 0.85, 1.00, 1.15, 1.25, 1.35})
+        best_hi, best_combo = best_lo, -1.0
+        for a_hi in alpha_hi_grid:
+            if a_hi < best_lo - 1e-9:
+                continue
+            pc = apply_entropy_gated_prior_debias(clean_raw_oof[tr], pi_k, best_lo, a_hi, h0=h0, h1=h1)
+            pe = apply_entropy_gated_prior_debias(ext_raw_oof[tr], pi_k, best_lo, a_hi, h0=h0, h1=h1)
+            fc = float(f1_score(y[tr], pc.argmax(1), average="macro", sample_weight=sw_k))
+            fe = float(f1_score(y[tr], pe.argmax(1), average="macro", sample_weight=sw_k))
+            combo = 0.50 * fc + 0.50 * fe
+            if combo > best_combo + 1e-9:
+                best_combo, best_hi = combo, float(a_hi)
+
+        fold_alphas_lo.append(best_lo)
+        fold_alphas_hi.append(best_hi)
+        nested_clean_deb[va] = apply_entropy_gated_prior_debias(
+            clean_raw_oof[va], pi_k, best_lo, best_hi, h0=h0, h1=h1
+        )
+        nested_ext_deb[va] = apply_entropy_gated_prior_debias(
+            ext_raw_oof[va], pi_k, best_lo, best_hi, h0=h0, h1=h1
+        )
+
+    return (
+        float(np.mean(fold_alphas_lo)),
+        float(np.mean(fold_alphas_hi)),
+        fold_alphas_lo,
+        fold_alphas_hi,
+        nested_clean_deb,
+        nested_ext_deb,
+    )
 
 
 def run_fusion(task4_dir: Path, save_outputs: bool = True, seed: int = 42) -> Dict[str, object]:
@@ -397,31 +489,45 @@ def run_fusion(task4_dir: Path, save_outputs: bool = True, seed: int = 42) -> Di
         clean_te_raw, hard_te_pool, js_te, tau_js, opt_gamma
     )
 
-    opt_alpha, fold_alphas, final_oof_deb = fit_nested_prior_debias(gated_oof_raw, y, folds)
+    opt_alpha_lo, opt_alpha_hi, fold_alphas_lo, fold_alphas_hi, final_oof_deb, final_ext_deb = (
+        fit_nested_entropy_prior_debias(gated_oof_raw, ext_hard_oof, y, folds, h0=0.20, h1=0.50)
+    )
     pi_tr = np.bincount(y, minlength=5).astype(np.float64) / len(y)
-    final_te_probs = gated_te_raw / (pi_tr[None, :] ** opt_alpha)
-    final_te_probs /= final_te_probs.sum(axis=1, keepdims=True)
+    sw_unif_all = 1.0 / pi_tr[y]
+    final_te_probs = apply_entropy_gated_prior_debias(
+        gated_te_raw, pi_tr, opt_alpha_lo, opt_alpha_hi, h0=0.20, h1=0.50
+    )
 
-    # Metrics + 500-resample paired bootstrap vs Run 22
+    # Run 22 ExtHard reference (DINOv2-StageC-6TTA) for paired bootstrap comparison on ExtHard6
+    r22_ext_base = norm_p(e2e["din_c6_ext"]) / (pi_tr[None, :] ** 0.86)
+    r22_ext_base /= r22_ext_base.sum(axis=1, keepdims=True)
+
+    # Metrics + 500-resample paired bootstrap vs Run 22 (both clean OOF and uniform-prior ExtHard6)
     all_f1 = float(f1_score(y, final_oof_deb.argmax(1), average="macro"))
+    clean_unif_f1 = float(f1_score(y, final_oof_deb.argmax(1), average="macro", sample_weight=sw_unif_all))
     iso_f1 = float(f1_score(y[iso_mask], final_oof_deb[iso_mask].argmax(1), average="macro"))
     corr_f1 = float(f1_score(y[corr_mask], final_oof_deb[corr_mask].argmax(1), average="macro"))
     ext_f1 = float(f1_score(y, ext_hard_oof.argmax(1), average="macro"))
+    ext_unif_f1 = float(f1_score(y, final_ext_deb.argmax(1), average="macro", sample_weight=sw_unif_all))
     oof_ll = float(log_loss(y, gated_oof_raw))
     ext_ll = float(log_loss(y, ext_hard_oof))
 
     rng = np.random.default_rng(seed)
     p_new_c, p_r22_c = final_oof_deb.argmax(1), r22_deb.argmax(1)
+    p_new_e, p_r22_e = final_ext_deb.argmax(1), r22_ext_base.argmax(1)
     n = len(y)
-    boot_wins = sum(
-        1
-        for _ in range(500)
-        if (
-            lambda idx: f1_score(y[idx], p_new_c[idx], average="macro")
-            > f1_score(y[idx], p_r22_c[idx], average="macro")
-        )(rng.integers(0, n, size=n))
-    )
+    boot_wins = 0
+    boot_wins_ext = 0
+    for _ in range(500):
+        idx = rng.integers(0, n, size=n)
+        if f1_score(y[idx], p_new_c[idx], average="macro") > f1_score(y[idx], p_r22_c[idx], average="macro"):
+            boot_wins += 1
+        if f1_score(y[idx], p_new_e[idx], average="macro", sample_weight=sw_unif_all[idx]) > f1_score(
+            y[idx], p_r22_e[idx], average="macro", sample_weight=sw_unif_all[idx]
+        ):
+            boot_wins_ext += 1
     boot_rate = boot_wins / 500.0
+    boot_rate_ext = boot_wins_ext / 500.0
 
     pred_labels = final_te_probs.argmax(1).astype(int)
     test_dist = {int(k): int(v) for k, v in pd.Series(pred_labels).value_counts().sort_index().items()}
@@ -436,17 +542,23 @@ def run_fusion(task4_dir: Path, save_outputs: bool = True, seed: int = 42) -> Di
             "gamma": round(opt_gamma, 4),
             "test_rows_gated": int((test_gate_vals > 0).sum()),
         },
-        "prior_debias_alpha": round(opt_alpha, 4),
-        "fold_alphas": [round(float(a), 3) for a in fold_alphas],
+        "prior_debias_alpha_lo": round(opt_alpha_lo, 4),
+        "prior_debias_alpha_hi": round(opt_alpha_hi, 4),
+        "prior_debias_entropy_ramp": [0.20, 0.50],
+        "fold_alphas_lo": [round(float(a), 3) for a in fold_alphas_lo],
+        "fold_alphas_hi": [round(float(a), 3) for a in fold_alphas_hi],
         "metrics": {
             "all_oof_f1": round(all_f1, 6),
+            "clean_unif_oof_f1": round(clean_unif_f1, 6),
             "iso_oof_f1": round(iso_f1, 6),
             "corrupt_oof_f1": round(corr_f1, 6),
             "exthard6_oof_f1": round(ext_f1, 6),
+            "exthard6_unif_oof_f1": round(ext_unif_f1, 6),
             "oof_logloss": round(oof_ll, 6),
             "exthard6_logloss": round(ext_ll, 6),
             "run22_baseline_f1": round(float(f1_score(y, r22_deb.argmax(1), average="macro")), 6),
             "paired_bootstrap_vs_r22": round(boot_rate, 4),
+            "paired_bootstrap_exthard6_vs_r22": round(boot_rate_ext, 4),
         },
         "test_distribution": test_dist,
     }
