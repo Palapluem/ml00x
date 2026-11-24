@@ -3,22 +3,20 @@
     "cnxv3",
     "dinov3l",
     "eva02l",
-    "siglip_l16",
     "foundvlm"
   ],
   "clean_pool_weights": {
-    "DINOv3-ViT-L": 0.0425,
-    "EVA02-Large": 0.1852,
-    "EVA02-Base": 0.0182,
-    "CNXv3-Base-Orig2": 0.069,
-    "CNXv3-Base-Hard6": 0.1123,
-    "DINOv3L-Hard-Orig2": 0.1564,
-    "DINOv3L-Hard-Hard6": 0.0369,
-    "EVA02L-Hard-Orig2": 0.1689,
-    "EVA02L-Hard-Hard6": 0.0673,
-    "SigLIPL16-Hard-Orig2": 0.0391,
-    "FoundVLM-4Fam-Orig2": 0.0553,
-    "FoundVLM-4Fam-Hard6": 0.0489
+    "DINOv3-ViT-L": 0.0513,
+    "EVA02-Large": 0.1883,
+    "EVA02-Base": 0.0257,
+    "CNXv3-Base-Orig2": 0.0671,
+    "CNXv3-Base-Hard6": 0.123,
+    "DINOv3L-Hard-Orig2": 0.1702,
+    "DINOv3L-Hard-Hard6": 0.0401,
+    "EVA02L-Hard-Orig2": 0.1745,
+    "EVA02L-Hard-Hard6": 0.0746,
+    "FoundVLM-4Fam-Orig2": 0.0491,
+    "FoundVLM-4Fam-Hard6": 0.0362
   },
   "clean_pool_temps": {
     "ConvNeXtV2-SGKF": 0.662,
@@ -36,26 +34,23 @@
     "DINOv3L-Hard-Hard6": 0.6916,
     "EVA02L-Hard-Orig2": 0.7115,
     "EVA02L-Hard-Hard6": 0.6942,
-    "SigLIPL16-Hard-Orig2": 0.7217,
-    "SigLIPL16-Hard-Hard6": 0.699,
-    "FoundVLM-4Fam-Orig2": 0.6899,
-    "FoundVLM-4Fam-Hard6": 0.6971
+    "FoundVLM-4Fam-Orig2": 0.6981,
+    "FoundVLM-4Fam-Hard6": 0.7024
   },
   "exthard_weights": {
-    "CNXv2-StageC-6TTA": 0.2933,
+    "CNXv2-StageC-6TTA": 0.204,
     "DINOv2-StageC-6TTA": 0.05,
-    "CNXv3-Base-Hard6": 0.0547,
-    "DINOv3L-Hard-Hard6": 0.262,
-    "EVA02L-Hard-Hard6": 0.2401,
-    "SigLIPL16-Hard-Hard6": 0.05,
-    "FoundVLM-4Fam-Hard6": 0.05
+    "CNXv3-Base-Hard6": 0.059,
+    "DINOv3L-Hard-Hard6": 0.2132,
+    "EVA02L-Hard-Hard6": 0.2262,
+    "FoundVLM-4Fam-Hard6": 0.2475
   },
   "shift_gate": {
-    "tau_js_98pct_iso": 0.012818,
-    "gamma": 0.0,
-    "test_rows_gated": 0
+    "tau_js_98pct_iso": 0.004921,
+    "gamma": 0.04,
+    "test_rows_gated": 778
   },
-  "prior_debias_alpha_lo": 0.66,
+  "prior_debias_alpha_lo": 0.69,
   "prior_debias_alpha_hi": 1.35,
   "prior_debias_entropy_ramp": [
     0.2,
@@ -63,10 +58,10 @@
   ],
   "fold_alphas_lo": [
     0.7,
+    0.7,
     0.65,
-    0.65,
-    0.65,
-    0.65
+    0.7,
+    0.7
   ],
   "fold_alphas_hi": [
     1.35,
@@ -76,23 +71,23 @@
     1.35
   ],
   "metrics": {
-    "all_oof_f1": 0.993993,
-    "clean_unif_oof_f1": 0.994567,
-    "iso_oof_f1": 0.995152,
-    "corrupt_oof_f1": 0.988997,
-    "exthard6_oof_f1": 0.97057,
-    "exthard6_unif_oof_f1": 0.968804,
-    "oof_logloss": 0.018961,
-    "exthard6_logloss": 0.087903,
+    "all_oof_f1": 0.993977,
+    "clean_unif_oof_f1": 0.994573,
+    "iso_oof_f1": 0.995007,
+    "corrupt_oof_f1": 0.989069,
+    "exthard6_oof_f1": 0.971097,
+    "exthard6_unif_oof_f1": 0.969549,
+    "oof_logloss": 0.019192,
+    "exthard6_logloss": 0.082799,
     "run22_baseline_f1": 0.991313,
     "paired_bootstrap_vs_r22": 1.0,
     "paired_bootstrap_exthard6_vs_r22": 1.0
   },
   "test_distribution": {
-    "0": 3573,
-    "1": 6785,
-    "2": 3940,
-    "3": 6285,
-    "4": 5306
+    "0": 3577,
+    "1": 6791,
+    "2": 3933,
+    "3": 6276,
+    "4": 5312
   }
 }
