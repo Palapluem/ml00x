@@ -15,8 +15,8 @@ The merged `sha12` equals the `[sha:<hash>]` tag in each Kaggle note.
 | [Task 4](task4/submit/submit.md) | `14de3b06cd9a` | 2026-11-24, #93 | Run 27 4-Family SOTA Fusion (`CNXv3+DINOv3L+EVA02L+FoundVLM-v2 10-Blk PowerNorm SymKL` + Shift Gate `0.04` + Nested `siglip_l16` Pruning) – `task4/scripts/fuse_t4_sota_trio.py` |
 | [Task 5](task5/submit/submit.md) | `a5005a73a89d` | 2026-11-23, #86 | Archetype rules + Exact Analytical Longitudinal Bayes (`ExactBayesUB`) – `task5/archetype_rules.py` |
 
-- **Merged sha12:** `d5ce58837641` – pending Kaggle submission
-- **Best Kaggle public so far:** 0.86674 (merged `f039fec2069d`, commit `15f1eba`)
+- **Merged sha12:** `d5ce58837641` – Kaggle public: 0.86680
+- **Best Kaggle public so far:** 0.86680 (merged `d5ce58837641`, commit `dc410ae`)
 
 ## Merged history
 
@@ -24,7 +24,7 @@ One row per `main` commit that changed any `task{N}/submit/index.csv`. "↩" mar
 
 | Date | Commit | PR | Merged sha12 | Tasks changed | Kaggle public | Note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-24 | `pending` | #93 | `d5ce58837641` | 4 | pending | feat(task4): Run 27 `FoundVLM-v2` (10-Blk PowerNorm + Dual-Condition SymKL `ExtHard UnifF1 0.89270→0.92429`) + Shift Gate `0.04` (`778` rows) + Prune redundant `siglip_l16` (`Clean UnifF1 0.994573`, `ExtHard6 UnifF1 0.969549` [`0.930` boot vs #91]), 73 rows changed (0.3%) |
+| 2026-11-24 | `dc410ae` | #93 | `d5ce58837641` | 4 | 0.86680 | feat(task4): Run 27 `FoundVLM-v2` (10-Blk PowerNorm + Dual-Condition SymKL `ExtHard UnifF1 0.89270→0.92429`) + Shift Gate `0.04` (`778` rows) + Prune redundant `siglip_l16` (`Clean UnifF1 0.994573`, `ExtHard6 UnifF1 0.969549` [`0.930` boot vs #91]), 73 rows changed (0.3%) |
 | 2026-11-24 | `15f1eba` | #91 | `f039fec2069d` | 4 | 0.86674 | feat(task4): Run 26 5-Family Fusion (+`SigLIPL16-Hard` + 5-Backbone 5,760d De-Corrupted v4 `FoundVLM` + Entropy-Gated Prior Debias: `Clean UnifF1 0.994567`, `ExtHard6 UnifF1 0.968804`, `OOF_LL 0.018961`), 336 rows changed (1.3%) |
 | 2026-11-23 | `5b5be0a` | #89 | `f7b9737efffc` | 1, 2 | 0.86557 | feat: Task 1 exp 006 MVN5-Tobit semi-sup + completeness blend (`OOF F2 0.840965→0.841552`, `5/5` folds, 138 rows 0.5%) & Task 2 `0.90 EM + 0.10 CB + logit bias` (`OOF F1 0.759316→0.759799`, 68 rows 0.3%) |
 | 2026-11-23 | `fa90a83` | #87 | `e3b50d7d48a7` | 4 | 0.86545 | feat(task4): Run 25-V2 Trio-Consensus Shift Gate (`gamma=0.10`, `test_rows_gated=770`, `OOF 0.994412`, `Iso 0.995665`, `Corrupt 0.989838`), 41 rows changed (0.2%) |
