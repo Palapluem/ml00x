@@ -26,10 +26,10 @@
 
 ### 2026-11-24 – `8f0b9db4d663` – #99
 
-- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Commit: `1e248d1` by Palapluem (Wisit Suwannao)
 - Prev: `14de3b06cd9a` | Δrows vs prev: 10 (0.04%)
 - Why: feat(task4): Run 30 (`P4a`) Private-LB Hardened SOTA Fusion integrating 6-Backbone 12-Block (`13,568d -> 768 -> 5`) True Joint `FoundVLM-v3-Joint12Blk` (`UnifPriorF1 0.96757→0.96820` [`1.000` boot], `ExtHard UnifF1 0.92429→0.92521` [`0.996` boot], `ExtLL 0.21018→0.20888`) + Simplex-Unconstrained `ExtHard6` (`min_bound=0.00`, zeroing noisy low-res `DINOv2-StageC-6TTA`) + Variance-Locked Run 27 calibration (`gamma=0.04`, `alpha=0.69/1.35`), improving every proper scoring rule and F1 metric over Run 27 simultaneously (`OOF_LL 0.019192→0.019164` [`0.986` boot], `ExtHard6_LL 0.082799→0.082581` [`0.998` boot], `CleanUnif F1 0.994573→0.994636` [`0.800` boot], `Corrupt F1 0.989069→0.989205` [`0.720` boot], `ExtHard6 UnifF1 0.969549→0.969820` [`0.888` boot]) with a ultra-balanced 10-row (`0.04%`, `[-2, -1, -1, +2, +2]`) shift
-- Merged: `7fceeedc7d15` | Kaggle public: –
+- Merged: `7fceeedc7d15` | Kaggle public: 0.86678
 
 ### 2026-11-24 – `14de3b06cd9a` – #98
 
