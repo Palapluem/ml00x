@@ -1,0 +1,9 @@
+Model / System,Protocol,Clean Unif-Prior F1,ExtHard6 Unif-Prior F1,OOF LogLoss,Notes
+Individual: Base ViT EVA02-Large (224px),Clean 5-Fold,0.989078,,0.069633,Baseline ViT stream
+Individual: Full-Res CNXv3-Base (192x384 Hard6),5-Fold SGKF,0.988908,,0.053564,High-res ConvNeXt DINOv3
+"Individual: FoundVLM-v3-Joint12Blk (6-BB 13,568d)",5-Fold SGKF,0.9682,0.92521,0.10114,6 Foundation backbones joint
+Run 22 Baseline (9-Stream E2E+ViT+DINOv2),Nested 5-Fold SGKF,0.991313,,0.0263,Kaggle Public 0.86337
+Run 25-V2 (Trio Hardened + Shift Gate 0.10),Nested 5-Fold SGKF,0.994412,0.9688,0.019381,Kaggle Public 0.86545
+Run 26 (+SigLIPL16 + FoundVLM-v1 5-BB),Nested 5-Fold SGKF,0.994567,0.968804,0.018961,Kaggle Public 0.86674
+Run 27 (FoundVLM-v2 10-Blk SymKL + Gate 0.04),Nested 5-Fold SGKF,0.994573,0.969549,0.019192,Best Public LB 0.86680 (Final #1)
+Run 30 P4a (Joint-12Blk + Unconstrained ExtHard6),Nested 5-Fold SGKF,0.994636,0.96982,0.019164,Best Proper Loss & ExtHard6 0.86678 (Final #2)

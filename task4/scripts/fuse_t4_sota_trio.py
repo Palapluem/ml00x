@@ -322,7 +322,8 @@ def run_fusion(
     save_outputs: bool = True,
     seed: int = 42,
     exclude_keys: Tuple[str, ...] = ("siglip_l16",),
-) -> Dict[str, object]:
+    return_details: bool = False,
+) -> object:
     """Run full Dual-Regime Pure-Train SOTA fusion and return verified metrics + artifact paths."""
     data_dir = task4_dir / "data"
     ml_dir = task4_dir / "predictions" / "model-level"
@@ -590,6 +591,39 @@ def run_fusion(
 
         with open(models_dir / "t4_sota_fusion_meta.json", "w", encoding="utf-8") as f:
             json.dump(summary, f, indent=2)
+
+    if return_details:
+        details = {
+            "y": y,
+            "folds": folds,
+            "iso_mask": iso_mask,
+            "corr_mask": corr_mask,
+            "sw_unif_all": sw_unif_all,
+            "pi_tr": pi_tr,
+            "pool_names": pool_names,
+            "pool_oof": pool_oof,
+            "w_clean": w_clean,
+            "T_pool": T_pool,
+            "hard_names": hard_names,
+            "hard_ext_oof": hard_ext_oof,
+            "w_hard": w_hard,
+            "T_hard": T_hard,
+            "clean_oof_raw": clean_oof_raw,
+            "hard_std_oof_pool": hard_std_oof_pool,
+            "ext_hard_oof": ext_hard_oof,
+            "gated_oof_raw": gated_oof_raw,
+            "final_oof_deb": final_oof_deb,
+            "final_ext_deb": final_ext_deb,
+            "final_te_probs": final_te_probs,
+            "js_oof": js_oof,
+            "js_te": js_te,
+            "test_gate_vals": test_gate_vals,
+            "r22_deb": r22_deb,
+            "r22_ext_base": r22_ext_base,
+            "pred_labels": pred_labels,
+            "discovered_fullres_models": list(discovered_fullres.keys()),
+        }
+        return summary, details
 
     return summary
 
