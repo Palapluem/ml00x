@@ -4,25 +4,32 @@
 
 ## Current
 
-- **sha12:** `e8722e3ad8bc` (since 2026-11-24, #91)
-- **Active Version:** **Run 26 — Dual-Regime 5-Family SOTA Fusion (`CNXv3-Base + DINOv3L-Hard + EVA02L-Hard + SigLIPL16-Hard + FoundVLM [5-Backbone 5,760d De-Corrupted v4]` + DINOv2 + Base ViTs + Entropy-Gated Prior Debiasing)** (`Palapluem`, PR `#91`)
+- **sha12:** `14de3b06cd9a` (since 2026-11-24, #93)
+- **Active Version:** **Run 27 — Dual-Regime 4-Family SOTA Fusion (`CNXv3-Base + DINOv3L-Hard + EVA02L-Hard + FoundVLM-v2 [10-Block PowerNorm Dual-Condition + SymKL Consistency]` + DINOv2 + Base ViTs + Nested `siglip_l16` Pruning)** (`Palapluem`, PR `#93`)
 - **Generating Script / Notebook:** `task4/scripts/fuse_t4_sota_trio.py`, `task4/notebooks/kaggle-t4-decorrupt-foundation.ipynb`, `task4/notebooks/kaggle-t4-clean-siglip-fast.ipynb`, `task4/task4_game_title_detection.ipynb`
 - **Required Artifacts:**
   - `task4/predictions/model-level/task4-sgkf-e2e-bundle.npz` (5-fold SGKF Pure-Train E2E `ConvNeXtV2`, `DINOv2-StageA/C`, `MLP-V3`)
   - `task4/predictions/model-level/task4-cnxv3-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-cnxv3-{orig2,hard6}-{oof,test-predictions}.csv`
   - `task4/predictions/model-level/task4-dinov3l-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-dinov3l-{orig2,hard6}-{oof,test-predictions}.csv`
   - `task4/predictions/model-level/task4-eva02l-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-eva02l-{orig2,hard6}-{oof,test-predictions}.csv`
-  - `task4/predictions/model-level/task4-siglip_l16-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-siglip_l16-{orig2,hard6}-{oof,test-predictions}.csv`
-  - `task4/predictions/model-level/task4-foundvlm-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-foundvlm-{orig2,hard6}-{oof,test-predictions}.csv` (5-backbone `siglip2_so400m` + `dinov3_vitl` + `dinov2_vitg14` + `clip_cnxl` + `clip_vith14`, 5,760d 4-view CL2N + 5-seed CosineResMLP + Nested PerBackbone-SLSQP)
+  - `task4/predictions/model-level/task4-siglip_l16-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-siglip_l16-{orig2,hard6}-{oof,test-predictions}.csv` *(archived reference; pruned by default in `fuse_t4_sota_trio.py` once `FoundVLM-v2` is present)*
+  - `task4/predictions/model-level/task4-foundvlm-sgkf-hard-bundle.npz` & `task4/predictions/model-level/task4-foundvlm-{orig2,hard6}-{oof,test-predictions}.csv` (5-backbone `FoundVLM-v2`: 10-block PowerNorm($0.75$) `[raw2, all4]` `11,520d` + `Clean+TrExt` LogReg + 5-seed Dual-Condition `CosineResMLP` w/ SymKL + 10-stream PerBackbone SLSQP)
   - 8 base ViT CSVs in `task4/predictions/model-level/`: `task4-{dinov3-vitb,dinov3-vitl,eva02-base,eva02-large}-{oof,test-predictions}.csv`
   - `task4/models/t4_sota_fusion_meta.json`, `task4/data/train.csv`, `task4/data/test.csv`
 - **Method & OOF Metrics (`31,546` train images, 100% Pure-Train):**
-  - Dual-Regime Temperature-Calibrated Log-Odds SLSQP Clean Pool (`EVA02-Large=0.1852`, `EVA02L-Hard-Orig2=0.1689`, `DINOv3L-Hard-Orig2=0.1564`, `CNXv3-Base-Hard6=0.1123`, `CNXv3-Base-Orig2=0.0690`, `EVA02L-Hard-Hard6=0.0673`, `FoundVLM-4Fam-Orig2=0.0553`, `FoundVLM-4Fam-Hard6=0.0489`, `DINOv3-ViT-L=0.0425`, `SigLIPL16-Hard-Orig2=0.0391`, `DINOv3L-Hard-Hard6=0.0369`, `EVA02-Base=0.0182`) + ExtHard6 Sub-Pool (`CNXv2-StageC-6TTA=0.2933`, `DINOv3L-Hard-Hard6=0.2620`, `EVA02L-Hard-Hard6=0.2401`, `CNXv3-Base-Hard6=0.0547`, `DINOv2-StageC-6TTA=0.0500`, `SigLIPL16-Hard-Hard6=0.0500`, `FoundVLM-4Fam-Hard6=0.0500`) + Pure-Train Entropy-Gated Prior Debiasing (`alpha_lo=0.66` `[0.7, 0.65, 0.65, 0.65, 0.65]`, `alpha_hi=1.35` `[1.35, 1.35, 1.35, 1.35, 1.35]`, ramp `[0.20, 0.50]`)
-  - `Clean Unif-Prior F1 = 0.994567` | `All OOF F1 = 0.993993` | `OOF LogLoss = 0.018961` | `Iso(<0.75) F1 = 0.995152` | `Corrupt F1 = 0.988997` | `ExtHard6 Unif-Prior F1 = 0.968804` (`ExtHard6 F1 = 0.970570`) | `ExtHard6 LogLoss = 0.087903` | `Paired Bootstrap vs Run 22 (Clean & ExtHard6) = 1.0000`
-- **Test Distribution (`25,889` rows):** `0` (`7-11k`): `3,573` (`13.8%`), `1` (`fiveN`): `6,785` (`26.2%`), `2` (`freefried`): `3,940` (`15.2%`), `3` (`pube`): `6,285` (`24.3%`), `4` (`roblock`): `5,306` (`20.5%`)
+  - Dual-Regime Temperature-Calibrated Log-Odds SLSQP Clean Pool (`EVA02-Large=0.1883`, `EVA02L-Hard-Orig2=0.1745`, `DINOv3L-Hard-Orig2=0.1702`, `CNXv3-Base-Hard6=0.1230`, `EVA02L-Hard-Hard6=0.0746`, `CNXv3-Base-Orig2=0.0671`, `DINOv3-ViT-L=0.0513`, `FoundVLM-4Fam-Orig2=0.0491`, `DINOv3L-Hard-Hard6=0.0401`, `FoundVLM-4Fam-Hard6=0.0362`, `EVA02-Base=0.0257`) + ExtHard6 Sub-Pool (`FoundVLM-4Fam-Hard6=0.2475`, `EVA02L-Hard-Hard6=0.2262`, `DINOv3L-Hard-Hard6=0.2132`, `CNXv2-StageC-6TTA=0.2040`, `CNXv3-Base-Hard6=0.0590`, `DINOv2-StageC-6TTA=0.0500`) + Consensus Restoration Shift Gate (`tau_js_98pct_iso=0.004921`, `gamma=0.04`, `test_rows_gated=778`) + Pure-Train Entropy-Gated Prior Debiasing (`alpha_lo=0.69` `[0.7, 0.7, 0.65, 0.7, 0.7]`, `alpha_hi=1.35`, ramp `[0.20, 0.50]`)
+  - `Clean Unif-Prior F1 = 0.994573` | `All OOF F1 = 0.993977` | `OOF LogLoss = 0.019192` | `Iso(<0.75) F1 = 0.995007` | `Corrupt F1 = 0.989069` | `ExtHard6 Unif-Prior F1 = 0.969549` (`ExtHard6 F1 = 0.971097`) | `ExtHard6 LogLoss = 0.082799` | `Paired Bootstrap vs Run 22 = 1.0000` (`vs Run 26 = 0.530 Clean / 0.930 ExtHard6`)
+- **Test Distribution (`25,889` rows):** `0` (`7-11k`): `3,577` (`13.8%`), `1` (`fiveN`): `6,791` (`26.2%`), `2` (`freefried`): `3,933` (`15.2%`), `3` (`pube`): `6,276` (`24.2%`), `4` (`roblock`): `5,312` (`20.5%`)
   - *Note:* `index.csv` stores canonical numeric labels `0..4` (`AGENTS.md` schema).
 
 ## Changelog
+
+### 2026-11-24 – `14de3b06cd9a` – #93
+
+- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Prev: `e8722e3ad8bc` | Δrows vs prev: 73 (0.3%)
+- Why: feat(task4): Run 27 upgrade `FoundVLM` -> `FoundVLM-v2` (10-block PowerNorm($0.75$) `[raw2, all4]` `11,520d` + `Clean+TrExt` LogReg + 5-seed Dual-Condition `CosineResMLP` w/ SymKL + 10-stream PerBackbone SLSQP; standalone `UnifPriorF1 0.96685 -> 0.96757`, `OOF_LL 0.10390 -> 0.10118`, `ExtHard UnifF1 0.89270 -> 0.92429` [`+0.03159`]) + prune redundant `siglip_l16` + re-activate Consensus Restoration Shift Gate (`gamma=0.04`, `778` rows gated), lifting `Clean Unif-Prior F1 0.994567 -> 0.994573`, `Corrupt F1 0.988997 -> 0.989069`, `ExtHard6 Unif-Prior F1 0.968804 -> 0.969549` (`+0.000745`, `0.930` paired bootstrap vs Run 26), `ExtHard6 LogLoss 0.087903 -> 0.082799`
+- Merged: `d5ce58837641` | Kaggle public: pending
 
 ### 2026-11-24 – `e8722e3ad8bc` – #91
 

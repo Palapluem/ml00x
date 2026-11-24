@@ -185,7 +185,7 @@ def fit_nested_shift_gate(
     corr_mask: np.ndarray,
 ) -> Tuple[np.ndarray, float, float]:
     """Tune Pure-Train consensus restoration shift gate strictly within outer training folds."""
-    gammas = [0.0, 0.10, 0.15, 0.20, 0.25, 0.35]
+    gammas = [0.0, 0.04, 0.08, 0.10, 0.15, 0.20, 0.25, 0.35]
     fold_taus: List[float] = []
     fold_gammas: List[float] = []
     gated_oof = np.zeros_like(p_clean_oof, dtype=np.float64)
@@ -317,7 +317,12 @@ def fit_nested_entropy_prior_debias(
     )
 
 
-def run_fusion(task4_dir: Path, save_outputs: bool = True, seed: int = 42) -> Dict[str, object]:
+def run_fusion(
+    task4_dir: Path,
+    save_outputs: bool = True,
+    seed: int = 42,
+    exclude_keys: Tuple[str, ...] = ("siglip_l16",),
+) -> Dict[str, object]:
     """Run full Dual-Regime Pure-Train SOTA fusion and return verified metrics + artifact paths."""
     data_dir = task4_dir / "data"
     ml_dir = task4_dir / "predictions" / "model-level"
@@ -372,8 +377,11 @@ def run_fusion(task4_dir: Path, save_outputs: bool = True, seed: int = 42) -> Di
         vit_te[m] = norm_p(t_df[p_cols].to_numpy())
 
     # Discover all completed Full-Res Nightmare-Hardened SGKF bundles
+    excluded = set(exclude_keys)
     discovered_fullres: Dict[str, np.lib.npyio.NpzFile] = {}
     for key in DEFAULT_FULLRES_KEYS:
+        if key in excluded:
+            continue
         bpath = ml_dir / f"task4-{key}-sgkf-hard-bundle.npz"
         if bpath.is_file():
             discovered_fullres[key] = np.load(bpath)
@@ -594,9 +602,10 @@ def main() -> None:
         help="Path to project/task4 directory",
     )
     ap.add_argument("--dry-run", action="store_true", help="Compute metrics without writing prediction/submit CSVs")
+    ap.add_argument("--exclude-keys", nargs="*", default=["siglip_l16"], help="Full-res model keys to exclude (default prunes redundant siglip_l16 when FoundVLM is present)")
     args = ap.parse_args()
 
-    res = run_fusion(Path(args.task4_dir), save_outputs=not args.dry_run)
+    res = run_fusion(Path(args.task4_dir), save_outputs=not args.dry_run, exclude_keys=tuple(args.exclude_keys))
     print(json.dumps(res, indent=2))
 
 
