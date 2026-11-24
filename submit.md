@@ -12,10 +12,10 @@ The merged `sha12` equals the `[sha:<hash>]` tag in each Kaggle note.
 | [Task 1](task1/submit/submit.md) | `db458dfc73b4` | 2026-11-23, #89 | exp 006 (Tobit-MVN5 semi-sup + cohort LR + exp 004) – `task1/run_account_cohorts.py` |
 | [Task 2](task2/submit/submit.md) | `9adab5d3de0d` | 2026-11-23, #89 | 0.90 EM + 0.10 CB + 4-param logit bias + affine export – `task2/run_bayes_export.py` |
 | [Task 3](task3/submit/submit.md) | `3646bdd6dda1` | 2026-11-19, #57 | Run 22 – `task3/task3_monthly_spending.ipynb` |
-| [Task 4](task4/submit/submit.md) | `14de3b06cd9a` | 2026-11-24, #93 | Run 27 4-Family SOTA Fusion (`CNXv3+DINOv3L+EVA02L+FoundVLM-v2 10-Blk PowerNorm SymKL` + Shift Gate `0.04` + Nested `siglip_l16` Pruning) – `task4/scripts/fuse_t4_sota_trio.py` |
+| [Task 4](task4/submit/submit.md) | `89ec3c8eb1f1` | 2026-11-24, #95 | Run 28 Split-Specialist `FoundVLM` (`v1_w6` Clean + `v2_w6` ExtHard6) + `CNXv3+DINOv3L+EVA02L` + Shift Gate `0.08` – `task4/scripts/fuse_t4_sota_trio.py` |
 | [Task 5](task5/submit/submit.md) | `a5005a73a89d` | 2026-11-23, #86 | Archetype rules + Exact Analytical Longitudinal Bayes (`ExactBayesUB`) – `task5/archetype_rules.py` |
 
-- **Merged sha12:** `d5ce58837641` – Kaggle public: 0.86680
+- **Merged sha12:** `feae75b9995e` – pending Kaggle submission
 - **Best Kaggle public so far:** 0.86680 (merged `d5ce58837641`, commit `dc410ae`)
 
 ## Merged history
@@ -24,6 +24,7 @@ One row per `main` commit that changed any `task{N}/submit/index.csv`. "↩" mar
 
 | Date | Commit | PR | Merged sha12 | Tasks changed | Kaggle public | Note |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-11-24 | `pending` | #95 | `feae75b9995e` | 4 | pending | feat(task4): Run 28 Split-Regime Specialist `FoundVLM` (`v1_w6` Orig2 + `v2_w6` ExtHard6) + Shift Gate `0.08` (`586` rows): `Clean UnifF1 0.994688`, `Corrupt F1 0.989434`, `OOF_LL 0.019006`, `ExtHard6 UnifF1 0.969549`, 57 rows changed (0.2%) |
 | 2026-11-24 | `dc410ae` | #93 | `d5ce58837641` | 4 | 0.86680 | feat(task4): Run 27 `FoundVLM-v2` (10-Blk PowerNorm + Dual-Condition SymKL `ExtHard UnifF1 0.89270→0.92429`) + Shift Gate `0.04` (`778` rows) + Prune redundant `siglip_l16` (`Clean UnifF1 0.994573`, `ExtHard6 UnifF1 0.969549` [`0.930` boot vs #91]), 73 rows changed (0.3%) |
 | 2026-11-24 | `15f1eba` | #91 | `f039fec2069d` | 4 | 0.86674 | feat(task4): Run 26 5-Family Fusion (+`SigLIPL16-Hard` + 5-Backbone 5,760d De-Corrupted v4 `FoundVLM` + Entropy-Gated Prior Debias: `Clean UnifF1 0.994567`, `ExtHard6 UnifF1 0.968804`, `OOF_LL 0.018961`), 336 rows changed (1.3%) |
 | 2026-11-23 | `5b5be0a` | #89 | `f7b9737efffc` | 1, 2 | 0.86557 | feat: Task 1 exp 006 MVN5-Tobit semi-sup + completeness blend (`OOF F2 0.840965→0.841552`, `5/5` folds, 138 rows 0.5%) & Task 2 `0.90 EM + 0.10 CB + logit bias` (`OOF F1 0.759316→0.759799`, 68 rows 0.3%) |
