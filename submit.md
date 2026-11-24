@@ -15,8 +15,8 @@ The merged `sha12` equals the `[sha:<hash>]` tag in each Kaggle note.
 | [Task 4](task4/submit/submit.md) | `e8722e3ad8bc` | 2026-11-24, #91 | Run 26 5-Family SOTA Fusion (`CNXv3+DINOv3L+EVA02L+SigLIPL16+FoundVLM 5-Backbone 5,760d` + Entropy-Gated Prior Debias) – `task4/scripts/fuse_t4_sota_trio.py` |
 | [Task 5](task5/submit/submit.md) | `a5005a73a89d` | 2026-11-23, #86 | Archetype rules + Exact Analytical Longitudinal Bayes (`ExactBayesUB`) – `task5/archetype_rules.py` |
 
-- **Merged sha12:** `f039fec2069d` – pending Kaggle submission
-- **Best Kaggle public so far:** 0.86557 (merged `f7b9737efffc`, commit `5b5be0a`)
+- **Merged sha12:** `f039fec2069d` – Kaggle public: 0.86674
+- **Best Kaggle public so far:** 0.86674 (merged `f039fec2069d`, commit `15f1eba`)
 
 ## Merged history
 
@@ -24,7 +24,7 @@ One row per `main` commit that changed any `task{N}/submit/index.csv`. "↩" mar
 
 | Date | Commit | PR | Merged sha12 | Tasks changed | Kaggle public | Note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-24 | `pending` | #91 | `f039fec2069d` | 4 | pending | feat(task4): Run 26 5-Family Fusion (+`SigLIPL16-Hard` + 5-Backbone 5,760d De-Corrupted v4 `FoundVLM` + Entropy-Gated Prior Debias: `Clean UnifF1 0.994567`, `ExtHard6 UnifF1 0.968804`, `OOF_LL 0.018961`), 336 rows changed (1.3%) |
+| 2026-11-24 | `15f1eba` | #91 | `f039fec2069d` | 4 | 0.86674 | feat(task4): Run 26 5-Family Fusion (+`SigLIPL16-Hard` + 5-Backbone 5,760d De-Corrupted v4 `FoundVLM` + Entropy-Gated Prior Debias: `Clean UnifF1 0.994567`, `ExtHard6 UnifF1 0.968804`, `OOF_LL 0.018961`), 336 rows changed (1.3%) |
 | 2026-11-23 | `5b5be0a` | #89 | `f7b9737efffc` | 1, 2 | 0.86557 | feat: Task 1 exp 006 MVN5-Tobit semi-sup + completeness blend (`OOF F2 0.840965→0.841552`, `5/5` folds, 138 rows 0.5%) & Task 2 `0.90 EM + 0.10 CB + logit bias` (`OOF F1 0.759316→0.759799`, 68 rows 0.3%) |
 | 2026-11-23 | `fa90a83` | #87 | `e3b50d7d48a7` | 4 | 0.86545 | feat(task4): Run 25-V2 Trio-Consensus Shift Gate (`gamma=0.10`, `test_rows_gated=770`, `OOF 0.994412`, `Iso 0.995665`, `Corrupt 0.989838`), 41 rows changed (0.2%) |
 | 2026-11-23 | `ca30f19` | #86 | `f5ad4958942c` | 5 | – | feat(task5): Exact Analytical Longitudinal Bayes (`ExactBayesUB`) for NaN-unstable recovery (`Masked AUC 0.9125→0.9366, PR-AUC 0.6932→0.7992, LL 0.1826→0.1385, Expected F3 0.99835`), 13 rows changed (`2,077` total flags) |

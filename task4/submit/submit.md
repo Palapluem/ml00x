@@ -26,10 +26,10 @@
 
 ### 2026-11-24 – `e8722e3ad8bc` – #91
 
-- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Commit: `15f1eba` by Palapluem (Wisit Suwannao)
 - Prev: `f9b481b506b7` | Δrows vs prev: 336 (1.3%)
 - Why: feat(task4): Run 26 5-Family SOTA Fusion integrating 5-fold SGKF Nightmare-Hardened `SigLIPL16-Hard` (`siglip_l16`) + 5-Backbone 5,760d De-Corrupted v4 `FoundVLM` (`siglip2_so400m` + `dinov3_vitl` + `dinov2_vitg14` + `clip_cnxl` + `clip_vith14`, standalone `UnifPriorF1 0.96685`, `OOF_LL 0.10390`, `ExtHard UnifF1 0.89270`) + Entropy-Gated Prior Debiasing (`alpha_lo=0.66`, `alpha_hi=1.35`, ramp `[0.20, 0.50]`), achieving `Clean Unif-Prior F1 0.994567`, `ExtHard6 Unif-Prior F1 0.968804`, `OOF LogLoss 0.019466 -> 0.018961` (`-0.000505`), `Paired Bootstrap vs Run 22 = 1.0000` (Clean & ExtHard6)
-- Merged: `f039fec2069d` | Kaggle public: pending
+- Merged: `f039fec2069d` | Kaggle public: 0.86674
 
 ### 2026-11-23 – `f9b481b506b7` – #87
 
