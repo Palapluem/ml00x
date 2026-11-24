@@ -1,0 +1,6 @@
+Class ID,Slug,Game Title,Support,Clean Precision,Clean Recall,Clean F1,ExtHard6 F1
+0,7-11k,7-11 Knights (7-11k),12429,0.99702,0.996138,0.996579,0.982956
+1,fiveN,FiveN (fiveN),4407,0.99613,0.992966,0.994545,0.973714
+2,freefried,Free Fried (freefried),5596,0.995708,0.994996,0.995352,0.972227
+3,pube,PUBE (pube),5926,0.995943,0.994094,0.995017,0.970372
+4,roblock,Roblock (roblock),3188,0.982652,0.994981,0.988778,0.954877
