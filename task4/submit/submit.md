@@ -26,10 +26,10 @@
 
 ### 2026-11-24 – `14de3b06cd9a` – #93
 
-- Commit: `pending` by Palapluem (Wisit Suwannao)
+- Commit: `dc410ae` by Palapluem (Wisit Suwannao)
 - Prev: `e8722e3ad8bc` | Δrows vs prev: 73 (0.3%)
 - Why: feat(task4): Run 27 upgrade `FoundVLM` -> `FoundVLM-v2` (10-block PowerNorm($0.75$) `[raw2, all4]` `11,520d` + `Clean+TrExt` LogReg + 5-seed Dual-Condition `CosineResMLP` w/ SymKL + 10-stream PerBackbone SLSQP; standalone `UnifPriorF1 0.96685 -> 0.96757`, `OOF_LL 0.10390 -> 0.10118`, `ExtHard UnifF1 0.89270 -> 0.92429` [`+0.03159`]) + prune redundant `siglip_l16` + re-activate Consensus Restoration Shift Gate (`gamma=0.04`, `778` rows gated), lifting `Clean Unif-Prior F1 0.994567 -> 0.994573`, `Corrupt F1 0.988997 -> 0.989069`, `ExtHard6 Unif-Prior F1 0.968804 -> 0.969549` (`+0.000745`, `0.930` paired bootstrap vs Run 26), `ExtHard6 LogLoss 0.087903 -> 0.082799`
-- Merged: `d5ce58837641` | Kaggle public: pending
+- Merged: `d5ce58837641` | Kaggle public: 0.86680
 
 ### 2026-11-24 – `e8722e3ad8bc` – #91
 
