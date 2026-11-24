@@ -15,7 +15,7 @@ The merged `sha12` equals the `[sha:<hash>]` tag in each Kaggle note.
 | [Task 4](task4/submit/submit.md) | `8f0b9db4d663` | 2026-11-24, #99 | Run 30 (`P4a`) Private-LB Hardened 4-Family SOTA Fusion (`CNXv3+DINOv3L+EVA02L+FoundVLM-v3-Joint12Blk 13,568d` + `ExtHard6 min_bound=0.00` + Locked Shift Gate `0.04`) – `task4/scripts/fuse_t4_sota_trio.py` |
 | [Task 5](task5/submit/submit.md) | `a5005a73a89d` | 2026-11-23, #86 | Archetype rules + Exact Analytical Longitudinal Bayes (`ExactBayesUB`) – `task5/archetype_rules.py` |
 
-- **Merged sha12:** `7fceeedc7d15`
+- **Merged sha12:** `7fceeedc7d15` – Kaggle public: 0.86678
 - **Best Kaggle public so far:** 0.86680 (merged `d5ce58837641`, commit `dc410ae`)
 
 ## Merged history
@@ -24,7 +24,7 @@ One row per `main` commit that changed any `task{N}/submit/index.csv`. "↩" mar
 
 | Date | Commit | PR | Merged sha12 | Tasks changed | Kaggle public | Note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-24 | `pending` | #99 | `7fceeedc7d15` | 4 | – | feat(task4): Run 30 (`P4a`) Private-LB Hardened 6-Backbone 12-Block (`13,568d`) True Joint `FoundVLM-v3-Joint12Blk` (`UnifPriorF1 0.96757→0.96820`, `ExtHard 0.92429→0.92521` [`0.996` boot]) + `ExtHard6 min_bound=0.00` (zeroing noisy `DINOv2-StageC`) + Locked Run 27 calibration (`gamma=0.04`, `alpha=0.69/1.35`): `OOF_LL 0.019192→0.019164` (`0.986` boot), `ExtHard6_LL 0.082799→0.082581` (`0.998` boot), `CleanUnif F1 0.994573→0.994636` (`0.800` boot), `Corrupt F1 0.989069→0.989205` (`0.720` boot), `ExtHard6 UnifF1 0.969549→0.969820` (`0.888` boot), 10 rows changed (0.04%) |
+| 2026-11-24 | `1e248d1` | #99 | `7fceeedc7d15` | 4 | 0.86678 | feat(task4): Run 30 (`P4a`) Private-LB Hardened 6-Backbone 12-Block (`13,568d`) True Joint `FoundVLM-v3-Joint12Blk` (`UnifPriorF1 0.96757→0.96820`, `ExtHard 0.92429→0.92521` [`0.996` boot]) + `ExtHard6 min_bound=0.00` (zeroing noisy `DINOv2-StageC`) + Locked Run 27 calibration (`gamma=0.04`, `alpha=0.69/1.35`): `OOF_LL 0.019192→0.019164` (`0.986` boot), `ExtHard6_LL 0.082799→0.082581` (`0.998` boot), `CleanUnif F1 0.994573→0.994636` (`0.800` boot), `Corrupt F1 0.989069→0.989205` (`0.720` boot), `ExtHard6 UnifF1 0.969549→0.969820` (`0.888` boot), 10 rows changed (0.04%) |
 | 2026-11-24 | `71d3694` | #98 | `d5ce58837641` | 4 | 0.86680 | ↩ same file as `dc410ae`. fix(task4): revert `task4/submit/index.csv` to Run 27 (`14de3b06cd9a`, 0.86680) after Run 29 (`95486a81aa7e`, 0.86672) dipped `-0.00008` |
 | 2026-11-24 | `0ea8b4b` | #97 | `4decf5076e7b` | 4 | 0.86672 | feat(task4): Run 29 6-Backbone All-In-One (`FoundVLM-v3` `UnifPriorF1 0.96757→0.96883`, `ExtHard 0.92429→0.92696` [`1.000` boot vs v2] + `clean_siglip_m5` + `clean_dinov3l_m5` + Shift Gate `0.08` [`738` rows]: `Clean UnifF1 0.994703`, `Corrupt F1 0.989501` [`0.942/0.960` boot vs #93], `OOF_LL 0.019161`), 53 rows changed (0.2%) |
 | 2026-11-24 | `89d8b85` | #96 | `d5ce58837641` | 4 | 0.86680 | ↩ same file as `dc410ae`. fix(task4): revert `task4/submit/index.csv` to Run 27 (`14de3b06cd9a`, 0.86680) after Run 28 (`89ec3c8eb1f1`, 0.86678) dipped `-0.00002` |
