@@ -36,10 +36,12 @@
 \setmathfont{TH Sarabun New}[Scale=1.46, range=up/{num,Latin,latin}]
 \setmathfont{TH Sarabun New Italic}[Scale=1.46, range=it/{Latin,latin}]
 \setmathfont{TH Sarabun New Bold}[Scale=1.46, range=bfup/{num,Latin,latin}]
-\usepackage{fancyhdr,titlesec,titletoc,listings,xurl,hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{fancyhdr,titlesec,titletoc,listings,url,hyperref}
+\def\UrlBreaks{\do\/\do\-\do\_\do\.\do\:}
 
 \XeTeXlinebreaklocale "th"
-\XeTeXlinebreakskip = 0pt
+\XeTeXlinebreakskip = 0pt plus 0.42pt
 
 % กำหนด \normalsize และ \small ให้มีระยะบรรทัดคงที่ตลอดทุกสภาพแวดล้อม (11pt x 1.46 ≈ 16pt TH Sarabun New)
 \makeatletter
@@ -158,7 +160,7 @@
     \normalsize
     \lineskiplimit=-3pt
     \lineskip=1pt
-    \tolerance=700\emergencystretch=1.1em\hbadness=1500
+    \tolerance=1200\emergencystretch=1.2em\hbadness=2500
     \renewcommand{\contentsname}{สารบัญ}
     \renewcommand{\tablename}{ตารางที่}
     \renewcommand{\figurename}{รูปที่}
@@ -179,11 +181,10 @@
 \renewcommand{\contentsname}{สารบัญ}
 \tableofcontents
 
-% เนื้อหาหลัก: เลขอารบิกเริ่มที่ 1 (จัดชิดซ้ายไม่ยืดช่องไฟ พร้อมย่อหน้าบรรทัดแรก 1.0cm)
+% เนื้อหาหลัก: เลขอารบิกเริ่มที่ 1 (จัดกระจายข้อความชิดขอบซ้าย-ขวาอย่างสมดุล พร้อมย่อหน้าบรรทัดแรก 1.0cm)
 \clearpage
 \pagenumbering{arabic}
 \renewcommand{\thepage}{\arabic{page}}
-\raggedright
 \setlength{\parindent}{1.0cm}
 \hyphenpenalty=50
 \exhyphenpenalty=50
@@ -235,11 +236,12 @@
 \end{itemize}
 
 ช่องทางอ้างอิงการแข่งขันและคลังซอร์สโค้ดหลักของกลุ่ม \textbf{ML004} ที่เผยแพร่ร่วมกันมี 3 แหล่งหลัก ได้แก่
+{\raggedright
 \begin{itemize}[leftmargin=1.9em,itemsep=1pt,topsep=0pt]
     \item \textbf{Kaggle:} \url{https://www.kaggle.com/competitions/player-intelligence-system-cpe-342-ml/}
     \item \textbf{คลังหลักของกลุ่ม:} \url{https://github.com/beambeambeam/ml00x} (โค้ดรวม, \code{submission/merge.py}, \code{submit.md})
     \item \textbf{คลังส่งงานรายวิชา:} \url{https://github.com/Palapluem/cpe342-machine-learning-2026/tree/main/project} (Notebooks \& Report)
-\end{itemize}
+\end{itemize}\par}
 
 \subsection{เครื่องมือและเทคโนโลยีที่ใช้ในการพัฒนา}
 
@@ -333,11 +335,12 @@ Task 5: Anomaly & ไม่มี Train / Test $25{,}889 \times 123$ (29 กล�
 
 \subsection{คำอธิบายปัญหา โครงสร้างคุณลักษณะ และบริบททางธุรกิจ}
 Task 1 เป็นปัญหาจำแนกประเภทแบบทวิภาค (\code{is\_cheater = 0} ผู้เล่นสุจริต และ \code{1} ผู้เล่นโกง) จากข้อมูลพฤติกรรมการเล่นและประวัติบัญชีรวม 31 ตัวแปรเชิงปริมาณ (ไม่นับรหัส \code{player\_id}) ตามเอกสาร \code{task1/data/datacard.txt} โดยจำแนกคุณลักษณะออกเป็น 3 กลุ่มหลัก ดังนี้
+{\raggedright
 \begin{itemize}
     \item \textbf{ทักษะการยิงและการเคลื่อนไหว (12 ตัวแปร):} ใช้วัดความแม่นยำและกลไกควบคุม ได้แก่ \code{kill\_death\_ratio}, \code{headshot\_percentage}, \code{win\_rate}, \code{accuracy\_score}, \code{kill\_consistency}, \code{reaction\_time\_ms}, \code{weapon\_switch\_speed}, \code{movement\_pattern\_score}, \code{aiming\_smoothness}, \code{spray\_control\_score}, \code{damage\_per\_round} และ \code{crosshair\_placement}
     \item \textbf{ความเข้าใจเชิงกลยุทธ์และการเล่นเป็นทีม (9 ตัวแปร):} สะท้อนการตัดสินใจเชิงยุทธวิธี ได้แก่ \code{game\_sense\_score}, \code{map\_knowledge}, \code{communication\_rate}, \code{team\_play\_score}, \code{buy\_decision\_score}, \code{clutch\_success\_rate}, \code{first\_blood\_rate}, \code{survival\_time\_avg} และ \code{utility\_usage\_rate}
     \item \textbf{ประวัติบัญชีและพฤติกรรมผิดปกติ (10 ตัวแปร):} บ่งชี้ลักษณะบัญชีและความต่อเนื่องในการเข้าเล่น ได้แก่ \code{account\_age\_days}, \code{level}, \code{level\_progression\_speed}, \code{friend\_network\_size}, \code{reports\_received}, \code{device\_changes\_count}, \code{input\_consistency\_score}, \code{avg\_session\_length\_min}, \code{sessions\_per\_day} และ \code{night\_play\_ratio}
-\end{itemize}
+\end{itemize}\par}
 
 เป้าหมายเชิงปฏิบัติการภายใต้มาตรวัด Binary $F_2$ Score คือช่วยทีมผู้ตรวจสอบจัดลำดับความเร่งด่วนของผู้เล่นต้องสงสัยจากรายงานกว่า 10,000 กรณีต่อวันให้ตรวจจับผู้ใช้ Subtle Aimbot และ Wallhack ได้มากที่สุดโดยไม่ระงับบัญชีผู้เล่นสุจริตโดยผิดพลาด ทั้งนี้ตามคำแนะนำในโจทย์เรื่องการจัดการค่าว่างและความไม่สมดุล (Class Weights, Resampling หรือ SMOTE) คณะผู้จัดทำทดสอบแล้วพบว่าเทคนิค SMOTE ทำให้ความน่าจะเป็นทำนายบิดเบี้ยวเมื่อนำไปใช้บนชุดทดสอบที่มีสัดส่วนข้อมูลขาดหายต่างจากชุดฝึกสอน จึงเลือกคงความบริสุทธิ์ของความน่าจะเป็นควบคู่กับจุดตัด $\tau^*$ ที่ปรับจูนแบบ Out-of-Fold แทน
 
@@ -444,13 +447,14 @@ Task 1 เป็นปัญหาจำแนกประเภทแบบท�
 
 \subsection{คำอธิบายปัญหา โครงสร้างคุณลักษณะ และการสำรวจข้อมูลเบื้องต้น}
 Task 2 จัดกลุ่มผู้เล่นออกเป็น 4 กลุ่มพฤติกรรม ได้แก่ \code{0=Casual} ($40{,}957$ ราย หรือ $39.38\%$), \code{1=Core/Grinder} ($26{,}032$ ราย หรือ $25.03\%$), \code{2=Social/Hardcore} ($21{,}029$ ราย หรือ $20.22\%$) และ \code{3=Whale} ($15{,}982$ ราย หรือ $15.37\%$) จากชุดข้อมูลฝึกสอน $104{,}000 \times 46$ คอลัมน์ และชุดทดสอบ $25{,}889 \times 45$ คอลัมน์ ตามเอกสาร \code{task2/data/datacard.txt} มีคุณลักษณะนำเข้าทั้งหมด 44 ตัวแปร ครอบคลุม 5 แกนข้อมูล ดังนี้
+{\raggedright
 \begin{itemize}
     \item \textbf{เวลาเล่นและความสม่ำเสมอ (7 ตัวแปร):} \code{play\_frequency}, \code{avg\_session\_duration}, \code{total\_playtime\_hours}, \code{login\_streak}, \code{days\_since\_last\_login}, \code{avg\_match\_length} และ \code{peak\_concurrent\_hours}
     \item \textbf{การใช้จ่ายและการตอบสนองโปรโมชัน (5 ตัวแปร):} \code{total\_spending\_thb}, \code{avg\_monthly\_spending}, \code{spending\_frequency}, \code{vip\_tier} และ \code{responds\_to\_discounts}
     \item \textbf{สังคมและการแข่งขัน (10 ตัวแปร):} \code{friend\_count}, \code{team\_play\_percentage}, \code{chat\_activity\_score}, \code{friend\_invites\_sent}, \code{gifts\_sent\_received}, \code{ranked\_participation\_rate}, \code{tournament\_entries}, \code{competitive\_rank}, \code{win\_rate\_ranked} และ \code{watches\_esports}
     \item \textbf{ความก้าวหน้า ความชอบ และคุณลักษณะบัญชี (19 ตัวแปร):} แบ่งเป็นตัวแปรเชิงปริมาณ 9 ตัวแปร ได้แก่ \code{achievement\_completion\_rate}, \code{collection\_progress}, \code{rare\_items\_count}, \code{speed\_of\_progression}, \code{item\_type\_preference\_cosmetic}, \code{item\_type\_preference\_performance}, \code{item\_type\_preference\_social}, \code{account\_age\_days} และ \code{preferred\_game\_mode} ร่วมกับตัวแปรหมวดหมู่ 10 ตัวแปร ได้แก่ \code{region}, \code{platform}, \code{device\_type}, \code{payment\_method}, \code{language}, \code{account\_status}, \code{player\_type\_tag}, \code{engagement\_level}, \code{loyalty\_tier} และ \code{skill\_tier}
     \item \textbf{ตัวแปรสัญญาณรบกวน (3 ตัวแปร):} \code{random\_metric\_1}, \code{random\_metric\_2} และ \code{random\_metric\_3} ซึ่งไม่มีความสัมพันธ์กับกลุ่มเป้าหมายและถูกคัดออกก่อนสร้างแบบจำลอง
-\end{itemize}
+\end{itemize}\par}
 
 จากการสำรวจข้อมูล (EDA) พบว่าชั่วโมงการเล่นสะสมเพียงอย่างเดียวไม่อาจแยกกลุ่ม Grinder, Social และ Whale ออกจากกันได้ จำเป็นต้องพิจารณาสัดส่วนข้ามมิติระหว่างการใช้จ่าย การแข่งขัน และกิจกรรมทางสังคม ภายใต้มาตรวัด \textbf{Unweighted Macro $F_1$} เนื่องจากคลาส 0 มีจำนวนมากกว่าคลาส 3 ถึง $2.56$ เท่า การทำนายด้วยค่า \code{argmax} ปกติจึงลดทอนความสำคัญและประสิทธิภาพการจำแนกกลุ่ม Whale และ Hardcore อีกทั้งจำเป็นต้องคัดตัวแปรสัญญาณรบกวน \code{random\_metric\_1..3} ออกตั้งแต่ขั้นเตรียมข้อมูลเพื่อไม่ให้แบบจำลองตระกูลต้นไม้ตัดสินใจ (Tree-Based Models) สร้างการแยกกิ่งบนสัญญาณสุ่ม
 
@@ -465,7 +469,7 @@ Task 2 จัดกลุ่มผู้เล่นออกเป็น 4 ก�
 
 คณะผู้จัดทำประเมินโมเดลฐาน 7 ตระกูลบน 5-Fold SKF ได้แก่ Parametric Expectation-Maximization Density (\code{ExactParamEM}, OOF LogLoss $= 0.59563$), \code{XGB\_Clean28}, \code{LGB\_Clean28}, \code{CB\_Clean28} (CatBoost), Deep Tabular \code{CleanTabM\_SWA3}, \code{Fact\_Clean28} และ \code{Oven\_Rev} พบว่า \code{ExactParamEM} จับโครงสร้างประชากรได้ดีที่สุด และเมื่อผสานความน่าจะเป็นในสัดส่วน \textbf{0.90 ExactParamEM + 0.10 CB\_Clean28} ช่วยเสริมความแม่นยำบริเวณเส้นแบ่งระหว่างกลุ่ม (Decision Boundary, $\text{margin} < 0.02$)
 
-หลังจากนั้นจึงปรับเทียบความน่าจะเป็นด้วย 4-Parameter Zero-Mean Logit Bias (\code{bias = [+0.002124, +0.002960, -0.006227, +0.001143]}) และประยุกต์ใช้กฎตัดสินใจที่เหมาะสมที่สุดสำหรับ Macro-$F_1$ ในรูป \textbf{Affine Bayes Fixed-Point Rule}:
+หลังจากนั้นจึงปรับเทียบความน่าจะเป็นด้วยค่าเบี่ยงเบนศูนย์รวม 4 พารามิเตอร์ (4-Parameter Zero-Mean Logit Bias: \code{bias = [+0.002124, +0.002960, -0.006227, +0.001143]}) และประยุกต์ใช้กฎตัดสินใจที่เหมาะสมที่สุดสำหรับ Macro-$F_1$ ในรูป \textbf{Affine Bayes Fixed-Point Rule}:
 \[
 \hat{y}_i = \arg\max_{c \in \{0,1,2,3\}} \bigl(\alpha_c p_{i,c} - \beta_c\bigr)
 \]
@@ -534,13 +538,14 @@ ExactParamEM (Cross-Fitted Affine Macro-$F_1$ Rule) & 0.59563 & 0.75920 & 1.00 \
 
 \subsection{คำอธิบายปัญหา กฎ Bayes-$L_1$ โครงสร้างคุณลักษณะ และการสำรวจข้อมูล}
 Task 3 มุ่งพยากรณ์ยอดการใช้จ่ายล่วงหน้า 30 วัน (\code{spending\_30d} หน่วยบาท ในช่วง $[0, 300{,}000]$) ภายใต้มาตรวัด \textbf{NMAE Score} จากชุดข้อมูลฝึกสอน $104{,}000 \times 34$ คอลัมน์ (มีค่าว่างรวม $193{,}731$ ช่อง) และชุดทดสอบ $25{,}889 \times 33$ คอลัมน์ (ค่าว่างรวม $48{,}266$ ช่อง) ตามเอกสาร \code{task3/data/datacard.txt} ตัวแปรนำเข้า 32 คอลัมน์แบ่งออกเป็น 5 กลุ่มหลัก ดังนี้
+{\raggedright
 \begin{itemize}
     \item \textbf{ประวัติการเงินและโปรโมชัน (11 ตัวแปร):} \code{historical\_spending}, \code{prev\_month\_spending}, \code{total\_transactions}, \code{avg\_transaction\_value}, \code{days\_since\_last\_purchase}, \code{purchase\_frequency}, \code{payment\_methods\_used}, \code{purchases\_on\_discount}, \code{discount\_rate\_used}, \code{seasonal\_spending\_pattern} และ \code{owns\_limited\_edition}
     \item \textbf{สถานะบัญชีและแพลตฟอร์ม (7 ตัวแปร):} \code{account\_age\_days}, \code{vip\_status}, \code{is\_premium\_member}, \code{primary\_game}, \code{games\_played}, \code{cross\_game\_activity} และ \code{platform}
     \item \textbf{กิจกรรมและสังคม (9 ตัวแปร):} \code{friend\_count}, \code{social\_interactions}, \code{guild\_membership}, \code{event\_participation\_rate}, \code{daily\_login\_streak}, \code{avg\_session\_length}, \code{sessions\_per\_week}, \code{total\_playtime\_hours} และ \code{days\_since\_last\_login}
     \item \textbf{ความสำเร็จและการแข่งขัน (4 ตัวแปร):} \code{achievement\_count}, \code{achievement\_completion\_rate}, \code{competitive\_rank} และ \code{tournament\_participation}
     \item \textbf{กลุ่มผู้เล่นที่เชื่อมมาจาก Task 2 (1 ตัวแปร):} \code{segment}
-\end{itemize}
+\end{itemize}\par}
 
 จาก EDA (\textbf{รูปที่~\ref{fig:t3_eda}}) พบเหตุผล 2 ประการที่ทำให้การทำ Regression มาตรฐานและการใช้ $\exp(\mathbb{E}[\log(1+Y)])$ โดยตรงไม่ประสบความสำเร็จ (ซึ่งเป็นหลุมพรางหลักของโจทย์ Target Scaling ตามคำแนะนำในเอกสารโครงการ):
 
@@ -572,9 +577,9 @@ Task 3 มุ่งพยากรณ์ยอดการใช้จ่าย�
 
 ระบบรุ่นแรก (\code{Quantile Hurdle V3}) ประกอบด้วย Stage-1 จำนวน 6 โมเดลผสม (\code{SLSQP6}) และ Stage-2 พยากรณ์ Quantile Residuals 15 ระดับ ($0.02..0.55$) จาก 5 ตระกูลโมเดลเพื่อประเมิน $Q_{1 - 1/(2p)}$ ทำคะแนน Strict Outer OOF NMAE ได้ \code{0.795996} (MAE $2{,}690.26$ บาท) สูงกว่าค่ามัธยฐานพื้นฐาน ($0.500037$, MAE $10{,}495.48$ บาท) และ Log-Linear Ridge Hurdle ($0.646699$, MAE $5{,}734.68$ บาท)
 
-เพื่อลดความคลาดเคลื่อนจากการแบ่ง Quantile คงที่ คณะผู้จัดทำจึงพัฒนาสถาปัตยกรรม \textbf{ExactBayesL1V2 Generative Marginalization} ซึ่งประกอบด้วย (1) ตาราง 32-Cell Exact Activation Table สำหรับ Stage-1 ที่ทำ OOF ROC-AUC $= 0.78535$ (สูงกว่า Logistic Regression $0.77614$ และ LightGBM $0.78408$), (2) กฎความหนาแน่นเชิงคูณของยอดใช้จ่าย, (3) องค์ประกอบผสม Segment-3 $\text{Uniform}[50{,}000, 300{,}000]$ และ (4) การแก้สมการหาค่ามัธยฐานมีเงื่อนไข $F_Y^{-1}(0.5 \mid X)$ โดยตรงด้วย \textbf{28-Step Bisection}
+เพื่อลดความคลาดเคลื่อนจากการแบ่ง Quantile คงที่ จึงพัฒนาแบบจำลอง \textbf{ExactBayesL1V2} (\textit{Generative Marginalization}) ซึ่งประกอบด้วย (1) ตาราง 32-Cell Exact Activation Table สำหรับ Stage-1 ที่ทำ OOF ROC-AUC $= 0.78535$ (สูงกว่า Logistic Regression $0.77614$ และ LightGBM $0.78408$), (2) กฎความหนาแน่นเชิงคูณของยอดใช้จ่าย, (3) องค์ประกอบผสม Segment-3 $\text{Uniform}[50{,}000, 300{,}000]$ และ (4) การแก้สมการหาค่ามัธยฐานมีเงื่อนไข $F_Y^{-1}(0.5 \mid X)$ โดยตรงด้วย \textbf{28-Step Bisection}
 
-\code{ExactBayesL1V2} บรรลุ \textbf{Strict 5-Fold Outer OOF NMAE $= 0.796377$} (\textbf{MAE $= 2{,}683.96$ บาท}, เฉลี่ยราย Fold $0.796306 \pm 0.005708$) ชนะ Quantile Hurdle V3 ครบทั้ง 5 Folds ($0.786151, 0.798213, 0.799203, 0.798332, 0.799630$) ด้วยส่วนต่าง $+0.000381$ (95\% Paired Bootstrap CI \code{[+0.000212, +0.000544]}, $P = 1.0000$ จาก 1,000 รอบ) และได้รับการคัดเลือกในทุก Nested Inner Fold (\code{w\_v2=1.00, tau=0.500, scale=1.0000}) สรุปใน \textbf{ตารางที่~\ref{tab:t3_ablation}} และ \textbf{รูปที่~\ref{fig:t3_diag}}--\textbf{\ref{fig:t3_test}}
+ระบบ \code{ExactBayesL1V2} ทำคะแนน \textbf{Strict 5-Fold Outer OOF NMAE $= 0.796377$} (\textbf{MAE $= 2{,}683.96$ บาท}, เฉลี่ยราย Fold $0.796306 \pm 0.005708$) ชนะ Quantile Hurdle V3 ครบทั้ง 5 Folds ($0.786151, 0.798213, 0.799203, 0.798332, 0.799630$) ด้วยส่วนต่าง $+0.000381$ (95\% Paired Bootstrap CI \code{[+0.000212, +0.000544]}, $P = 1.0000$ จาก 1,000 รอบ) และได้รับการคัดเลือกในทุก Nested Inner Fold (\code{w\_v2=1.00, tau=0.500, scale=1.0000}) สรุปใน \textbf{ตารางที่~\ref{tab:t3_ablation}} และ \textbf{รูปที่~\ref{fig:t3_diag}}--\textbf{\ref{fig:t3_test}}
 
 \begin{table}[H]\centering
 {\tblfont
@@ -644,7 +649,7 @@ Task 4 จำแนกภาพหน้าจอการเล่นเกม�
     \item \textbf{Joint 12-Block 6-Backbone Foundation Engine (\code{FoundVLM-v3-Joint12Blk}):} สกัดเวกเตอร์ Embedding 4 มุมมอง (\code{raw}, \code{raw+hflip}, \code{decorrupt\_v4}, \code{decorrupt\_v4+hflip}) จากโมเดลฐาน 6 สถาปัตยกรรม (\code{SigLIP2-SO400M}, \code{DINOv3-ViT-L}, \code{DINOv2-ViT-G/14}, \code{CLIP-ConvNeXt-Large}, \code{CLIP-ViT-H/14}, \code{DINOv3-ConvNeXt-Base}) ต่อรวมเป็นเวกเตอร์ $13{,}568$ มิติ ปรับมาตรฐานด้วย PowerNorm ($p=0.75$) ผ่าน Dual-Condition \code{CosineResMLP} ที่บังคับความคงที่ระหว่างภาพดิบกับภาพฟื้นฟูด้วย Symmetric-KL Consistency Loss
 \end{enumerate}
 
-ขั้นตอนการผสานผลลัพธ์ประยุกต์ \textbf{Nested Temperature-Calibrated Log-Odds Geometric Pooling} สองสภาวะควบคู่กับประตูสลับสถานะและการปรับแก้สัดส่วนคลาส ดังนี้
+ขั้นตอนการผสานผลลัพธ์ประยุกต์ใช้เทคนิค \textbf{Nested Log-Odds Geometric Pooling} แบบปรับเทียบอุณหภูมิสองสภาวะควบคู่กับประตูสลับสถานะและการปรับแก้สัดส่วนคลาส ดังนี้
 \begin{itemize}
     \item \textbf{Clean Pool (11 Active Streams):} ผสานโมเดลบนภาพหน้าจอสภาวะปกติเพื่อคงความคมชัดขององค์ประกอบ HUD และรายละเอียดระดับสูง
     \item \textbf{Unconstrained \code{ExtHard6} Pool:} กำหนดขอบเขตล่าง \code{min\_bound = 0.00} เพื่อลดน้ำหนัก \code{DINOv2-StageC-6TTA} ที่มีสัญญาณรบกวนลงเหลือ $0.0000$ โดยอัตโนมัติ และเน้นน้ำหนักไปที่ \code{FoundVLM-4Fam-Hard6} ($0.2607$), \code{CNXv2-StageC-6TTA} ($0.2321$), \code{EVA02L-Hard-Hard6} ($0.2302$) และ \code{DINOv3L-Hard-Hard6} ($0.2170$)
@@ -727,6 +732,7 @@ Stage 4: + Dual-Condition SymKL FoundVLM-v2 & 0.994573 & 0.969549 & 0.019192 \\
 
 \subsection{คำอธิบายปัญหา โครงสร้างข้อมูลอนุกรมเวลา และข้อจำกัดของวิธี Unsupervised มาตรฐาน}
 Task 5 เป็นงานตรวจจับบัญชีผิดปกติ (\code{is\_anomaly = 1}) ภายใต้มาตรวัด \textbf{$F_3$ Score} ในสภาวะ \textbf{Unsupervised Pure-Test} โดยชุดข้อมูลมีเฉพาะ \code{test.csv} ขนาด $25{,}889 \times 123$ คอลัมน์ ปราศจากป้ายกำกับ ภายในประกอบด้วยตัวแปรนำเข้า 122 ตัวแปร ตามเอกสาร \code{task5/data/datacard.txt} แบ่งออกเป็น 3 ส่วน ดังนี้
+{\raggedright
 \begin{itemize}
     \item \textbf{อนุกรมเวลาพฤติกรรม 4 ช่วงเวลาต่อเนื่อง (\code{\_1..\_4}, 29 ตระกูล $\times 4 = 116$ ตัวแปร):}
     \begin{itemize}[leftmargin=1.5em,itemsep=1pt,topsep=1pt]
@@ -737,7 +743,7 @@ Task 5 เป็นงานตรวจจับบัญชีผิดปก�
     \end{itemize}
     \item \textbf{ตัวแปรภาพรวมระดับบัญชี (2 ตัวแปร):} \code{account\_age\_days} และ \code{behavior\_stability}
     \item \textbf{ธงความมั่นคงปลอดภัยสำหรับทวนสอบ (4 ตัวแปร):} \code{password\_changed}, \code{vpn\_usage}, \code{suspicious\_login\_time} และ \code{mass\_item\_sale} ซึ่งทีมผู้พัฒนากันออกจากการฝึกและประเมินโมเดลโดยสิ้นเชิง เพื่อใช้ทวนสอบความน่าเชื่อถือในขั้นตอนสุดท้าย
-\end{itemize}
+\end{itemize}\par}
 
 ข้อค้นพบสำคัญเมื่อทดสอบตามคำแนะนำในโจทย์ (Isolation Forest, One-Class SVM และ Dense Autoencoder) คืออัลกอริทึมระยะทางบนปริภูมิรวมทั้งหมด (Full-Space Detectors) ประสบปัญหา Feature Dilution อย่างรุนแรง เนื่องจากบัญชีที่ผิดปกติจริงมักแสดงความผิดปกติรุนแรงบนฟีเจอร์เฉพาะทางเพียง 1--4 ตัวแปร จากกว่า 75+ มิติ ขณะที่ตัวแปรอื่นทั้งหมดยังอยู่ในเกณฑ์ปกติ ส่งผลให้คะแนนรวมถูกกลบโดยมิติปกติจนแยกไม่ออกจากผู้เล่นเดินทางข้ามพื้นที่จริงหรือผู้เล่นที่เว้นช่วงเวลาโจมตีเกิน 24 ชั่วโมง
 
@@ -811,7 +817,7 @@ Task 5 เป็นงานตรวจจับบัญชีผิดปก�
 
 \subsection{การบูรณาการผลทำนายทั้ง 5 งาน โครงสร้าง LTV และผลตรวจรับไฟล์คำตอบ}
 
-ในภาพรวมเชิงสถาปัตยกรรม ผลทำนายจากทั้ง 5 โมเดลถูกส่งต่อเข้าสู่สคริปต์บูรณาการ \code{merge\_submission.ipynb} เพื่อรวมคอลัมน์คำตอบตามลำดับ \code{ANS00001}--\code{ANS25889} และตรวจสอบความถูกต้อง 4 ด้านก่อนใช้งานจริง ได้แก่ ขนาดข้อมูล ($25{,}889 \times 6$ คอลัมน์), ความครบถ้วน (\code{0} ค่าว่าง/ค่าอนันต์), การคงลำดับรหัสตาม \code{sample\_submission.csv} และขอบเขตชนิดข้อมูลของทุกงาน
+ในภาพรวมเชิงสถาปัตยกรรม ผลทำนายจากทั้ง 5 โมเดลถูกส่งต่อเข้าสู่สคริปต์และสมุดบันทึกบูรณาการผลลัพธ์ (\code{merge\_submission.ipynb}) เพื่อรวมคอลัมน์คำตอบตามลำดับ \code{ANS00001}--\code{ANS25889} และตรวจสอบความถูกต้อง 4 ด้านก่อนใช้งานจริง ได้แก่ ขนาดข้อมูล ($25{,}889 \times 6$ คอลัมน์), ความครบถ้วน (\code{0} ค่าว่าง/ค่าอนันต์), การคงลำดับรหัสตาม \code{sample\_submission.csv} และขอบเขตชนิดข้อมูลของทุกงาน
 
 จากนั้นระบบจึงเชื่อมผลลัพธ์เข้าสู่ \textbf{Player Lifetime Value (LTV) Prediction System} ของบริษัท Karena Thailand ดังบทบาทของแต่ละโมเดลต่อไปนี้
 \begin{itemize}
@@ -860,7 +866,7 @@ Task 5: Security & 8 Exact Empty-Gap / 12D Box Archetype Rules + ExactBayesUB An
 
 \subsection{การทำงานร่วมกันในทีม โครงสร้างคลังซอร์สโค้ด และบทเรียนสำคัญ}
 
-กลุ่ม \textbf{ML004} แบ่งโครงสร้างการพัฒนาซอร์สโค้ดออกเป็นโมดูลอิสระแยกตามโฟลเดอร์งาน (\code{task1}--\code{task5}) ภายใต้ระบบควบคุมเวอร์ชัน GitHub บนคลังหลักของทีม (\url{https://github.com/beambeambeam/ml00x}) ควบคู่กับการรวบรวม Jupyter Notebooks ฉบับส่งงานรายวิชาใน \url{https://github.com/Palapluem/cpe342-machine-learning-2026/tree/main/project} เพื่อให้แต่ละส่วนสามารถพัฒนา Feature Engineering ทดสอบสมมติฐาน และตรวจสอบคะแนน Validation ผ่าน Pull Request ได้โดยไม่ขัดแย้งกัน พร้อมบังคับใช้มาตรฐาน Pure-Train Invariant, กฎความบริสุทธิ์ของชุดทดสอบ และการตรวจนัยสำคัญทางสถิติร่วมกันทั้งกลุ่ม โดยมี \textit{\mbox{วิศิษฐ์ สุวรรณเนาว์}} (\code{67070501042}) เป็นผู้พัฒนาหลักใน Task 3 และประสานงานรวมชุดส่งคำตอบ (\code{merge\_submission.ipynb}) ขณะที่สมาชิกท่านอื่น ได้แก่ \textit{\mbox{กันต์ธีร์ ดวงมณี}} (\code{67070501003}), \textit{\mbox{นัธทวัฒน์ ปริมสิริคุณาวุฒิ}} (\code{67070501027}), \textit{\mbox{ศุภวิชญ์ มารยาท}} (\code{67070501045}) และ \textit{\mbox{พลวริษฐ์ วัฒนเหมรัตน์}} (\code{67070501067}) ร่วมออกแบบและพัฒนาข้ามโมดูลภายในคลังซอร์สโค้ดของกลุ่ม ดังสรุปข้อค้นพบใน \textbf{ตารางที่~\ref{tab:insights_mistakes}} และแผนผังไฟล์สำคัญของทั้งสองคลังใน \textbf{ตารางที่~\ref{tab:repo_structure}}
+กลุ่ม \textbf{ML004} แบ่งโครงสร้างการพัฒนาซอร์สโค้ดออกเป็นโมดูลอิสระแยกตามโฟลเดอร์งาน (\code{task1}--\code{task5}) ภายใต้ระบบควบคุมเวอร์ชัน GitHub บนคลังหลักของทีม (\url{https://github.com/beambeambeam/ml00x}) ควบคู่กับการรวบรวม Jupyter Notebooks สำหรับส่งงานรายวิชาไว้ในคลัง \url{https://github.com/Palapluem/cpe342-machine-learning-2026/tree/main/project} เพื่อให้แต่ละส่วนสามารถพัฒนา Feature Engineering ทดสอบสมมติฐาน และตรวจสอบคะแนน Validation ผ่าน Pull Request ได้โดยไม่ขัดแย้งกัน พร้อมบังคับใช้มาตรฐาน Pure-Train Invariant, กฎความบริสุทธิ์ของชุดทดสอบ และการตรวจนัยสำคัญทางสถิติร่วมกันทั้งกลุ่ม โดยมี \textit{\mbox{วิศิษฐ์ สุวรรณเนาว์}} (\code{67070501042}) เป็นผู้พัฒนาหลักใน Task 3 และประสานงานรวมชุดส่งคำตอบ (\code{merge\_submission.ipynb}) ขณะที่สมาชิกท่านอื่น ได้แก่ \textit{\mbox{กันต์ธีร์ ดวงมณี}} (\code{67070501003}), \textit{\mbox{นัธทวัฒน์ ปริมสิริคุณาวุฒิ}} (\code{67070501027}), \textit{\mbox{ศุภวิชญ์ มารยาท}} (\code{67070501045}) และ \textit{\mbox{พลวริษฐ์ วัฒนเหมรัตน์}} (\code{67070501067}) ร่วมออกแบบและพัฒนาข้ามโมดูลภายในคลังซอร์สโค้ดของกลุ่ม ดังสรุปข้อค้นพบใน \textbf{ตารางที่~\ref{tab:insights_mistakes}} และแผนผังไฟล์สำคัญของทั้งสองคลังใน \textbf{ตารางที่~\ref{tab:repo_structure}}
 
 \begin{table}[H]\centering
 {\tblfont\renewcommand{\arraystretch}{1.04}\setlength{\tabcolsep}{4pt}
@@ -923,6 +929,7 @@ Merge & \code{submission/merge.py}, \code{submit.md}, \code{report/report.tex} &
 % ==============================================================================
 \clearpage
 \renewcommand{\refname}{บรรณานุกรม}
+{\raggedright
 \begin{thebibliography}{14}
 \addcontentsline{toc}{section}{บรรณานุกรม}
 
@@ -954,6 +961,6 @@ Merge & \code{submission/merge.py}, \code{submit.md}, \code{report/report.tex} &
 
 \bibitem{ml00xrepo} Group ML004, ``ml00x: CPE 342 Karena Player Intelligence System Source Repository,'' GitHub, 2026. [Online]. Available: \url{https://github.com/beambeambeam/ml00x} and \url{https://github.com/Palapluem/cpe342-machine-learning-2026/tree/main/project}
 
-\end{thebibliography}
+\end{thebibliography}\par}
 
 \end{document}
