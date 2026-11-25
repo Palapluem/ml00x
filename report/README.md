@@ -14,7 +14,7 @@ report/
 │   └── assets/
 │       ├── KMUTT_Logo.png
 │       └── KMUTT_Logo.svg
-├── assets/                          # กราฟวินิจฉัยความละเอียด 300 dpi (18 ภาพจาก Tasks 1–5)
+├── assets/                          # กราฟวินิจฉัยความละเอียด 300 dpi (19 ภาพจาก Tasks 1–5 และ Leaderboard)
 ├── report.tex                       # ต้นฉบับรายงาน XeLaTeX ฉบับสมบูรณ์ (สารบัญ, บทที่ 1–8, บรรณานุกรม)
 └── output/
     └── pdf/
