@@ -1,0 +1,21 @@
+# Python / uv / test / lint caches
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.pytest_cache/
+.venv/
+
+# macOS / OS metadata
+.DS_Store
+Thumbs.db
+
+# LaTeX build artifacts & stray root PDF previews (keep report/output/pdf/ tracked)
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.fls
+report/*.fdb_latexmk
+report/*.xdv
+report/*.synctex.gz
+report/*.pdf
